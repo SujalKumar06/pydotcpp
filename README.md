@@ -1,2 +1,2 @@
-# Python-Interpreter-in-C-
+# pydotcpp
 Will add later
