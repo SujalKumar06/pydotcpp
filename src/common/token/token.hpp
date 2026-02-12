@@ -37,7 +37,7 @@ enum class TokenType {
 };
 
 
-class Token{
+class Token {
 public:
     // Main part of a token
     TokenType type;
@@ -48,7 +48,7 @@ public:
     int column;
 
     // This constructor will allow us to easily make the tokens while coding
-    Token(TokenType type, std::string val, int l, int c)
+    Token(TokenType type, std::string val, int l, int c);
 };
 
 

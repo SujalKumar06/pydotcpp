@@ -6,12 +6,10 @@
 
 #include "token.hpp"
 
-class Lexer{
+class Lexer {
 public:
-    Lexer(std::string input_string){
-        this->source_code = preprocess_indents(input_string);
-    }
-    std::vector<Token> scan_Tokens();
+    Lexer(std::string input_string);
+    std::vector<Token> scan_Tokens(void);
 
 private:
     std::string source_code;
@@ -31,8 +29,7 @@ private:
         {":",      TokenType::COLON},
         {",",      TokenType::COMMA},
         {"\n",     TokenType::NEWLINE},
-        {"\t",     TokenType::INDENT},
-        {"\r",     TokenType::DEDENT}
+        {"\t",     TokenType::INDENT}
     };
     std::vector<Token> tokens;
     int start = 0;
@@ -41,16 +38,16 @@ private:
 
 
     // FUNCTIONS NEEDED FOR LEXER TO WORK
-    bool isAtEnd();         // Checks for last character
-    char advance();         // Return current char and move forward
-    char peek();            // Sometimes, we don't actually want to read a character and may only want to peek at it
-    char peekNext();        // Peak at the next character
+    bool isAtEnd(void);         // Checks for last character
+    char advance(void);         // Return current char and move forward
+    char peek(void);            // Sometimes, we don't actually want to read a character and may only want to peek at it
+    char peekNext(void);        // Peak at the next character
 
     void addToken(TokenType type);
 
     // Specific scanners for complex types
-    void scanString();
-    void scanNumber();
-    void scanIdentifier();
+    void scanString(void);
+    void scanNumber(void);
+    void scanIdentifier(void);
     std::string preprocess_indents(std::string raw);
 };
