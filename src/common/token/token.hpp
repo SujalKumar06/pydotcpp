@@ -33,7 +33,11 @@ enum class TokenType {
     COLON, // :
     INDENT,
     DEDENT,
-    COMMENT // #
+    COMMENT, // #
+    PRINT,
+    AMPERSAND, // &
+    PIPE, // |
+    SPACE,
 };
 
 
