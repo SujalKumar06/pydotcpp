@@ -11,6 +11,7 @@ bool Lexer::isAtEnd(){
     }
     return false;
 }
+
 char Lexer::peek(){
     if (current_index >= source_code.size()){
         return '\0';
@@ -80,38 +81,37 @@ void Lexer::scanIdentifier(std::string curr){
     tokens.push_back(token);
 }
 
-
 std::vector<Token> Lexer::scan_Tokens(){
     while (true){
-    if (isAtEnd()){
-        Token token(TokenType::EOF_TOKEN, "", line, column);
-        tokens.push_back(token);
-        break;
+        if (isAtEnd()){
+            Token token(TokenType::EOF_TOKEN, "", line, column);
+            tokens.push_back(token);
+            break;
+        }
+        std::string curr = "";
+        curr += advance();
+        if (keywords.count(curr)){
+            TokenType type = keywords.at(curr);
+            if (type == TokenType::NEWLINE){
+                column = 0;
+                line++;
+            }
+            else if (type == TokenType::INDENT){
+                column += 3;
+            }
+            else if (type == TokenType::DEDENT){
+                column -= 5;
+            }
+            Token token(type, curr, line, column);
+            tokens.push_back(token);
+        }
+        else{     
+            if (std::isdigit(curr[0])){
+                scanNumber(curr);
+            }
+            else if (std::isalpha(curr[0])){
+                scanIdentifier(curr);
+            }
+        } 
     }
-    std::string curr = "";
-    curr += advance();
-    if (keywords.count(curr)){
-        TokenType type = keywords.at(curr);
-        if (type == TokenType::NEWLINE){
-            column = 0;
-            line++;
-        }
-        else if (type == TokenType::INDENT){
-            column += 3;
-        }
-        else if (type == TokenType::DEDENT){
-            column -= 5;
-        }
-        Token token(type, curr, line, column);
-        tokens.push_back(token);
-    }
-    else{     
-        if (std::isdigit(curr[0])){
-            scanNumber(curr);
-        }
-        else if (std::isalpha(curr[0])){
-            scanIdentifier(curr);
-        }
-    } 
-}
 }
