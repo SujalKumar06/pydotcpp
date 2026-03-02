@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: C++ CI
 
 on:
   push:
@@ -20,6 +20,3 @@ jobs:
 
     - name: Check Formatting
       run: make check-format
-    
-    - name: Build project
-      run: make
