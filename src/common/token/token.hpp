@@ -6,9 +6,21 @@ enum class TokenType {
     DEF,
     RETURN,
     IF,
+    ELIF,
     ELSE,
     FOR,
     WHILE,
+    BREAK,
+    CONTINUE,
+    PASS,
+    TRUE,
+    FALSE,
+    NONE,
+    AND,
+    OR,
+    NOT,
+    IN,
+    IS,
 
     IDENTIFIER,
     NUMBER,
@@ -22,6 +34,10 @@ enum class TokenType {
     MODULO, // %
     GREATERTHAN, // >
     LESSERTHAN, // <
+    GREATEREQUAL, // >=
+    LESSEQUAL, // <=
+    EQEQUAL, // ==
+    
 
     LPAREN, // (
     RPAREN, // )
