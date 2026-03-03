@@ -4,7 +4,9 @@
 #include <string>
 #include <stdexcept>
 
-Lexer::Lexer(std::string input_string) : source_code(input_string){}
+Lexer::Lexer(std::string input_string)
+    : source_code(input_string){}
+
 bool Lexer::isAtEnd(){
     if (current_index >= source_code.size()){
         return true;
