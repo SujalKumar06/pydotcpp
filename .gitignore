@@ -1,6 +1,9 @@
 #build directory
 build/
 
+# Config files
+.*/
+
 # Prerequisites
 *.d
 
