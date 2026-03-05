@@ -37,6 +37,11 @@ enum class TokenType {
     GREATEREQUAL, // >=
     LESSEQUAL, // <=
     EQEQUAL, // ==
+    NOTEQUAL, // !=
+    PLUSEQUAL, // +=
+    MINUSEQUAL, // -=
+    STAREQUAL, // *=
+    SLASHEQUAL, // /=
     
 
     LPAREN, // (
