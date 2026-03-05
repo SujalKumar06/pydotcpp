@@ -2,6 +2,7 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 
 enum class ASTNodeType {
     BINARY, //binary operators
@@ -10,7 +11,14 @@ enum class ASTNodeType {
     NUMBER, //number literals
     BOOLEAN, //boolean literals
     NONE, //None
-    REFERENCE //variable(identifier) references
+    REFERENCE, //variable(identifier) references
+    VAR_DECL, //all declaration statements of the type x = y
+    PRINT_STMT, //print(something) will all go here
+    IF_STMT,    //if statement. Points to condition (BINARY or UNARY or other relevant nodes) and BLOCK
+    ELIF_STMT, //elif statement. Points to BLOCK
+    ELSE_STMT,  //else statement. Points to BLOCK
+    BLOCK,  //reference to a vector of ASTNodes that are in a block
+    PROGRAM //root node
 };
 
 enum class OperatorType {
@@ -92,16 +100,74 @@ public:
     BooleanNode(bool value);
 
     bool value;
-}
+};
 
 class NoneNode : public ASTNode {
 public:
     NoneNode();
-}
+};
 
 class ReferenceNode : public ASTNode {
 public:
     ReferenceNode(std::string name);
 
     std::string name;
+};
+
+class VarDeclNode : public ASTNode {
+public:
+    VarDeclNode(std::unique_ptr<ASTNode> name, std::unique_ptr<ASTNode> value);
+
+    std::unique_ptr<ASTNode> name; //A reference node which stores the name of the variable
+    std::unique_ptr<ASTNode> value; //A number, string or boolean node that stores the value inside the variable
+};
+
+class PrintStmtNode : public ASTNode {
+public:
+    PrintStmtNode(std::unique_ptr<ASTNode> expr);
+
+    std::unique_ptr<ASTNode> expr;
+};
+
+class IfStmtNode : public ASTNode {
+public:
+    IfStmtNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<ASTNode> block);
+
+    std::unique_ptr<ASTNode> condition;
+    std::unique_ptr<ASTNode> block;
+    std::unique_ptr<ASTNode> elif_ptr;
+    std::unique_ptr<ASTNode> else_ptr;
+};
+
+class ElifStmtNode : public ASTNode {
+public:
+    ElifStmtNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<ASTNode> block);
+
+    std::unique_ptr<ASTNode> condition;
+    std::unique_ptr<ASTNode> block;
+    std::unique_ptr<ASTNode> elif_ptr;
+    std::unique_ptr<ASTNode> else_ptr;
+};
+
+class ElseStmtNode : public ASTNode {
+public:
+    ElseStmtNode(std::unique_ptr<ASTNode> block);
+
+    std::unique_ptr<ASTNode> block;
+};
+
+class BlockNode : public ASTNode {
+public:
+    BlockNode() : ASTNode(ASTNodeType::BLOCK) {}
+
+    std::vector<std::unique_ptr<ASTNode>> statements;
+};
+
+class ProgramNode : public ASTNode {
+public:
+    virtual ~ProgramNode() noexcept override = default;
+
+    std::vector<std::unique_ptr<ASTNode>> statements;
+
+    ProgramNode() : ASTNode(ASTNodeType::PROGRAM) {}
 };
