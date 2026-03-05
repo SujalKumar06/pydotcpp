@@ -45,9 +45,24 @@ void Lexer::scanNumber(std::string curr) {
     while (std::isdigit(peek())) {
         curr += Lexer::advance();
     }
+<<<<<<< HEAD
     if (std::isalnum(peek())) {
         // throw an error
     }
+=======
+
+    if (peek() == '.' && std::isdigit(peekNext())) {
+        curr += advance();
+        while (std::isdigit(peek())) {
+            curr += advance();
+        }
+    }
+
+    if (std::isalnum(peek()) || peek()=='_') {
+        // throw an error
+    }
+
+>>>>>>> c283021 (Implemented floating point numbers, two-character operators)
     Token token(TokenType::NUMBER, curr, line, start);
     tokens.push_back(token);
 }
@@ -89,6 +104,73 @@ std::vector<Token> Lexer::scan_Tokens() {
         }
         std::string curr = "";
         curr += advance();
+
+        if (curr == " ") {
+            continue;
+        }
+
+        // handle two-character operators
+        if (curr == "=" && peek() == '=') {
+            advance();
+            Token token(TokenType::EQEQUAL, "==", line, column-2); // using column-2 since we are advancing twice
+            tokens.push_back(token);
+            continue;
+        }
+
+        if (curr == ">" && peek() == '=') {
+            advance();
+            Token token(TokenType::GREATEREQUAL, ">=", line, column-2);
+            tokens.push_back(token);
+            continue;
+        }
+
+        if (curr == "<" && peek() == '=') {
+            advance();
+            Token token(TokenType::LESSEQUAL, "<=", line, column-2);
+            tokens.push_back(token);
+            continue;
+        }
+
+        if (curr == "+" && peek() == '=') {
+            advance();
+            Token token(TokenType::PLUSEQUAL, "+=", line, column-2);
+            tokens.push_back(token);
+            continue;
+        }
+
+        if (curr == "-" && peek() == '=') {
+            advance();
+            Token token(TokenType::MINUSEQUAL, "-=", line, column-2);
+            tokens.push_back(token);
+            continue;
+        }
+
+        if (curr == "*" && peek() == '=') {
+            advance();
+            Token token(TokenType::STAREQUAL, "*=", line, column-2);
+            tokens.push_back(token);
+            continue;
+        }
+
+        if (curr == "/" && peek() == '=') {
+            advance();
+            Token token(TokenType::SLASHEQUAL, "/=", line, column-2);
+            tokens.push_back(token);
+            continue;
+        }
+
+        if (curr == "!") {
+            if (peek() == '=') {
+                advance();
+                Token token(TokenType::NOTEQUAL, "!=", line, column-2);
+                tokens.push_back(token);
+                continue;
+            } 
+                else {
+                // throw an error
+            }
+        }
+        
         if (keywords.count(curr)) {
             TokenType type = keywords.at(curr);
             if (type == TokenType::NEWLINE) {
@@ -102,12 +184,24 @@ std::vector<Token> Lexer::scan_Tokens() {
             Token token(type, curr, line, column);
             tokens.push_back(token);
         } else {
+<<<<<<< HEAD
             if (std::isdigit(curr[0])) {
+=======
+            if (curr == "\"" || curr == "'") {
+                scanString(curr);
+            }
+            else if (std::isdigit(curr[0])) {
+>>>>>>> c283021 (Implemented floating point numbers, two-character operators)
                 scanNumber(curr);
             } else if (std::isalpha(curr[0])) {
                 scanIdentifier(curr);
             }
         }
     }
+<<<<<<< HEAD
 }
 // empty commit
+=======
+    return tokens;
+}
+>>>>>>> c283021 (Implemented floating point numbers, two-character operators)

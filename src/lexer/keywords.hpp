@@ -29,7 +29,6 @@ inline const std::unordered_map<std::string, TokenType> keywords = {
         {",",       TokenType::COMMA},
         {"\n",      TokenType::NEWLINE},
         {"\t",      TokenType::INDENT},
-        {" ",       TokenType::SPACE},
         {"and",     TokenType::AND},
         {"or",      TokenType::OR},
         {"not",     TokenType::NOT},
@@ -38,5 +37,7 @@ inline const std::unordered_map<std::string, TokenType> keywords = {
         {"False",   TokenType::FALSE},
         {"True",    TokenType::TRUE},
         {"None",    TokenType::NONE},
-
+        {">",       TokenType::GREATERTHAN},
+        {"<",       TokenType::LESSERTHAN},
+        {"%",       TokenType::MODULO},
     };
