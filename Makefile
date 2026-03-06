@@ -40,7 +40,7 @@ run: all
 
 clean:
 	rm -rf $(BUILD_DIR)
-
+  
 format:
 	find $(SRC_DIR)/ -name '*.cpp' -o -name '*.h' | xargs clang-format -i
 
