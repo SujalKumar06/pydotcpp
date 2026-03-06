@@ -1,3 +1,5 @@
+#include <stdexcept>
+
 #include "exprparser.hpp"
 
 ExprParser::ExprParser(std::vector<Token> tokens)
@@ -27,10 +29,10 @@ OperatorType ExprParser::toOperatorType(TokenType type) {
         //comparison
         case TokenType::GREATERTHAN: return OperatorType::GREATERTHAN;
         case TokenType::LESSTHAN: return OperatorType::LESSTHAN;
-        case TokenType::GREATERTHANEQ: return OperatorType::GREATERTHANEQ;
-        case TokenType::LESSTHANEQ: return OperatorType::LESSTHANEQ;
-        case TokenType::EQUALS: return OperatorType::EQUALS;
-        case TokenType::NOTEQUALS: return OperatorType::NOTEQUALS;
+        case TokenType::GREATEREQUAL: return OperatorType::GREATEREQUAL;
+        case TokenType::LESSEQUAL: return OperatorType::LESSEQUAL;
+        case TokenType::EQEQUAL: return OperatorType::EQEQUAL;
+        case TokenType::NOTEQUAL: return OperatorType::NOTEQUAL;
 
         //additive
         case TokenType::PLUS: return OperatorType::PLUS;
@@ -48,34 +50,11 @@ OperatorType ExprParser::toOperatorType(TokenType type) {
     }
 }
 
-std::unique_ptr<ASTNode> ExprParser::parseExprStmt() {
-    return parseAssignment();
-}
-
-std::unique_ptr<ASTNode> ExprParser::parseExpr() {
+std::unique_ptr<ASTExprNode> ExprParser::parseExpr() {
     return parseLogicalOr();
 }
 
-std::unique_ptr<ASTNode> ExprParser::parseAssignment() {
-    auto lhs = parseLogicalOr();
-
-    //right associative
-    if (match(TokenType::ASSIGN)) {
-        //checking for assignable target
-        if (lhs->type != ASTNodeType::REFERENCE) {
-            //parsing error(implementation to be decided still, this is a placeholder)
-            throw std::runtime_error("invalid assignment target");
-        }
-
-        advance();
-        auto rhs = parseAssignment();
-        return std::make_unique<BinaryOperatorNode>(OperatorType::ASSIGN, std::move(lhs), std::move(rhs));
-    }
-
-    return std::move(lhs);
-}
-
-std::unique_ptr<ASTNode> ExprParser::parseLogicalOr() {
+std::unique_ptr<ASTExprNode> ExprParser::parseLogicalOr() {
     auto lhs = parseLogicalAnd();
 
     //left associative
@@ -88,7 +67,7 @@ std::unique_ptr<ASTNode> ExprParser::parseLogicalOr() {
     return std::move(lhs);
 }
 
-std::unique_ptr<ASTNode> ExprParser::parseLogicalAnd() {
+std::unique_ptr<ASTExprNode> ExprParser::parseLogicalAnd() {
     auto lhs = parseLogicalNot();
 
     //left associative
@@ -101,7 +80,7 @@ std::unique_ptr<ASTNode> ExprParser::parseLogicalAnd() {
     return std::move(lhs);
 }
 
-std::unique_ptr<ASTNode> ExprParser::parseLogicalNot() {
+std::unique_ptr<ASTExprNode> ExprParser::parseLogicalNot() {
     //right associative
     if (match(TokenType::NOT)) {
         advance();
@@ -112,23 +91,28 @@ std::unique_ptr<ASTNode> ExprParser::parseLogicalNot() {
     return parseComparison();
 }
 
-std::unique_ptr<ASTNode> ExprParser::parseComparison() {
+std::unique_ptr<ASTExprNode> ExprParser::parseComparison() {
     auto lhs = parseAdditive();
 
     //left associative
     while (
         match(TokenType::GREATERTHAN) ||
         match(TokenType::LESSTHAN) ||
-        match(TokenType::GREATERTHANEQ) ||
-        match(TokenType::LESSTHANEQ) ||
-        match(TokenType::EQUALS) ||
-        match(TokenType::NOTEQUALS)
+        match(TokenType::GREATEREQUAL) ||
+        match(TokenType::LESSEQUAL) ||
+        match(TokenType::EQEQUAL) ||
+        match(TokenType::NOTEQUAL)
     ) {
-
+        TokenType type = peek().type;
+        advance();
+        auto rhs = parseAdditive();
+        lhs = std::make_unique<BinaryOperatorNode>(toOperatorType(type), std::move(lhs), std::move(rhs));
     }
+
+    return std::move(lhs);
 }
 
-std::unique_ptr<ASTNode> ExprParser::parseAdditive() {
+std::unique_ptr<ASTExprNode> ExprParser::parseAdditive() {
     auto lhs = parseMultiplicative();
 
     //left associative
@@ -145,7 +129,7 @@ std::unique_ptr<ASTNode> ExprParser::parseAdditive() {
     return std::move(lhs);
 }
 
-std::unique_ptr<ASTNode> ExprParser::parseMultiplicative() {
+std::unique_ptr<ASTExprNode> ExprParser::parseMultiplicative() {
     auto lhs = parseUnary();
 
     //left associative
@@ -164,7 +148,7 @@ std::unique_ptr<ASTNode> ExprParser::parseMultiplicative() {
     return std::move(lhs);
 }
 
-std::unique_ptr<ASTNode> ExprParser::parseUnary() {
+std::unique_ptr<ASTExprNode> ExprParser::parseUnary() {
     //right associative
     if (
         match(TokenType::PLUS) ||
@@ -179,7 +163,7 @@ std::unique_ptr<ASTNode> ExprParser::parseUnary() {
     return parsePrimary();
 }
 
-std::unique_ptr<ASTNode> ExprParser::parsePrimary() {
+std::unique_ptr<ASTExprNode> ExprParser::parsePrimary() {
     if (match(TokenType::LPAREN)) {
         advance();
         auto expr = parseExpr();
@@ -187,6 +171,8 @@ std::unique_ptr<ASTNode> ExprParser::parsePrimary() {
         if (!match(TokenType::RPAREN)) {
             throw std::runtime_error("expected closing parenthesis");
         }
+        advance();
+
         return expr;
     }
 
@@ -196,9 +182,15 @@ std::unique_ptr<ASTNode> ExprParser::parsePrimary() {
         case TokenType::NUMBER:
             double value = std::stod(token.value);
             return make_unique<NumberNode>(value);
-        case: TokenType::STRING:
+        case TokenType::STRING:
             return make_unique<StringNode>(std::move(token.value));
-        case: TokenType::REFERENCE:
+        case TokenType::TRUE:
+            return make_unique<BooleanNode>(true);
+        case TokenType::FALSE:
+            return make_unique<BooleanNode>(false);
+        case TokenType::NONE:
+            return make_unique<NoneNode>();
+        case TokenType::REFERENCE:
             return make_unique<ReferenceNode>(std::move(token.value));
         default:
             throw std::runtime_error("invalid token found");
