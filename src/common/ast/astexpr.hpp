@@ -3,7 +3,7 @@
 #include <string>
 #include <memory>
 
-enum class ASTNodeType {
+enum class ASTExprNodeType {
     BINARY, //binary operators
     UNARY, //unary operators
     STRING, //string literals
@@ -14,9 +14,6 @@ enum class ASTNodeType {
 };
 
 enum class OperatorType {
-    //assignment
-    ASSIGN, // =
-
     //logical
     OR, // or
     AND, // and
@@ -44,62 +41,62 @@ enum class OperatorType {
     POWER, // **
 };
 
-//abstract ASTNode class
-class ASTNode {
+//abstract ASTExprNode class
+class ASTExprNode {
 public:
-    ASTNode(ASTNodeType type);
+    ASTExprNode(ASTExprNodeType type);
     virtual ~ASTNode() = default;
 
     //type
-    ASTNodeType type;
+    ASTExprNodeType type;
 };
 
-class BinaryOperatorNode : public ASTNode {
+class BinaryOperatorNode : public ASTExprNode {
 public:
-    BinaryOperatorNode(OperatorType op, std::unique_ptr<ASTNode> lhs, std::unique_ptr<ASTNode> rhs);
+    BinaryOperatorNode(OperatorType op, std::unique_ptr<ASTExprNode> lhs, std::unique_ptr<ASTExprNode> rhs);
 
     //operator type
     OperatorType op;
-    std::unique_ptr<ASTNode> lhs;
-    std::unique_ptr<ASTNode> rhs;
+    std::unique_ptr<ASTExprNode> lhs;
+    std::unique_ptr<ASTExprNode> rhs;
 };
 
-class UnaryOperatorNode : public ASTNode {
+class UnaryOperatorNode : public ASTExprNode {
 public:
-    UnaryOperatorNode(OperatorType op, std::unique_ptr<ASTNode> rhs);
+    UnaryOperatorNode(OperatorType op, std::unique_ptr<ASTExprNode> rhs);
 
     //operator type
     OperatorType op;
-    std::unique_ptr<ASTNode> rhs;
+    std::unique_ptr<ASTExprNode> rhs;
 };
 
-class StringNode : public ASTNode {
+class StringNode : public ASTExprNode {
 public:
     StringNode(std::string value);
 
     std::string value;
 };
 
-class NumberNode : public ASTNode {
+class NumberNode : public ASTExprNode {
 public:
     NumberNode(double value);
 
     double value;
 };
 
-class BooleanNode : public ASTNode {
+class BooleanNode : public ASTExprNode {
 public:
     BooleanNode(bool value);
 
     bool value;
 }
 
-class NoneNode : public ASTNode {
+class NoneNode : public ASTExprNode {
 public:
     NoneNode();
 }
 
-class ReferenceNode : public ASTNode {
+class ReferenceNode : public ASTExprNode {
 public:
     ReferenceNode(std::string name);
 
