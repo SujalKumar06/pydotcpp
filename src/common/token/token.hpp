@@ -30,6 +30,8 @@ enum class TokenType {
     MINUS, // -
     STAR, // *
     SLASH, // /
+    FLOORDIV, // //
+    POWER, // **
     ASSIGN, // =
     MODULO, // %
     GREATERTHAN, // >
