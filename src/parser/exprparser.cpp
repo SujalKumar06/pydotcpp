@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-ExprParser::ExprParser(std::vector<Token> tokens) : tokens(std::move(tokens)) {}
+ExprParser::ExprParser(std::vector<Token>& tokens, int& index) : tokens(tokens), index(index) {}
 
 Token ExprParser::peek() {
     if (index < tokens.size())
@@ -175,7 +175,8 @@ std::unique_ptr<ASTExprNode> ExprParser::parsePower() {
     if (match(TokenType::POWER)) {
         advance();
         auto rhs = parseUnary();
-        return std::make_unique<BinaryOperatorNode>(OperatorType::POWER, std::move(lhs), std::move(rhs));
+        return std::make_unique<BinaryOperatorNode>(OperatorType::POWER, std::move(lhs),
+                                                    std::move(rhs));
     }
 
     return lhs;

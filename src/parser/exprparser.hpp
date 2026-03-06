@@ -9,7 +9,7 @@
 
 class ExprParser {
 public:
-    ExprParser(std::vector<Token> tokens);
+    ExprParser(std::vector<Token>& tokens, int& index);
     std::unique_ptr<ASTExprNode> parseExpr();
 
 private:
@@ -31,6 +31,6 @@ private:
     bool match(TokenType type);
     OperatorType toOperatorType(TokenType type);
 
-    //index in the token vector
-    int index = 0;
+    std::vector<Token>& tokens;
+    int& index; //index in the token vector
 };
