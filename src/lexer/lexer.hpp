@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <cctype> //to check if char is alphanumeric
+#include <stack>
 
 #include "token.hpp"
 
@@ -20,13 +21,14 @@ private:
     int current_index = 0;
     int line = 1;
     int column = 1;
+    std::stack<int> indent_stack;
 
 
     // FUNCTIONS NEEDED FOR LEXER TO WORK
-    bool isAtEnd();         // Checks for last character
+    bool isAtEnd() const;         // Checks for last character
     char advance();         // Return current char and move forward
-    char peek();            // Sometimes, we don't actually want to read a character and may only want to peek at it
-    char peekNext();        // Peak at the next character
+    char peek() const;            // Sometimes, we don't actually want to read a character and may only want to peek at it
+    char peekNext() const;        // Peak at the next character
 
     void addToken(TokenType type);
 
@@ -34,5 +36,5 @@ private:
     void scanString(std::string first);
     void scanNumber(std::string first);
     void scanIdentifier(std::string first);
-    std::string preprocess_indents(std::string raw);
+    void processIndent();   // To process indents at the start of every line
 };
