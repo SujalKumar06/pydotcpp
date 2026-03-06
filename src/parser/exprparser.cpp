@@ -1,51 +1,69 @@
-#include <stdexcept>
-
 #include "exprparser.hpp"
 
-ExprParser::ExprParser(std::vector<Token> tokens)
-    : tokens(tokens) {}
+#include <stdexcept>
+
+ExprParser::ExprParser(std::vector<Token> tokens) : tokens(tokens) {}
 
 Token ExprParser::peek() {
-    if (index < tokens.size()) return tokens[index];
-    else return tokens.back(); //EOF token
+    if (index < tokens.size())
+        return tokens[index];
+    else
+        return tokens.back();  // EOF token
 }
 
 Token ExprParser::peekNext() {
-    if (index+1 < tokens.size()) return tokens[index+1];
-    else return tokens.back(); //EOF token
+    if (index + 1 < tokens.size())
+        return tokens[index + 1];
+    else
+        return tokens.back();  // EOF token
 }
 
 void advance() {
-    if (index < tokens.size()) index++;
+    if (index < tokens.size())
+        index++;
 }
 
 bool ExprParser::match(TokenType type) {
-    if (index < tokens.size() && peek().type == type) return true;
-    else return false;
+    if (index < tokens.size() && peek().type == type)
+        return true;
+    else
+        return false;
 }
 
 OperatorType ExprParser::toOperatorType(TokenType type) {
     switch (type) {
-        //comparison
-        case TokenType::GREATERTHAN: return OperatorType::GREATERTHAN;
-        case TokenType::LESSTHAN: return OperatorType::LESSTHAN;
-        case TokenType::GREATEREQUAL: return OperatorType::GREATEREQUAL;
-        case TokenType::LESSEQUAL: return OperatorType::LESSEQUAL;
-        case TokenType::EQEQUAL: return OperatorType::EQEQUAL;
-        case TokenType::NOTEQUAL: return OperatorType::NOTEQUAL;
+        // comparison
+        case TokenType::GREATERTHAN:
+            return OperatorType::GREATERTHAN;
+        case TokenType::LESSTHAN:
+            return OperatorType::LESSTHAN;
+        case TokenType::GREATEREQUAL:
+            return OperatorType::GREATEREQUAL;
+        case TokenType::LESSEQUAL:
+            return OperatorType::LESSEQUAL;
+        case TokenType::EQEQUAL:
+            return OperatorType::EQEQUAL;
+        case TokenType::NOTEQUAL:
+            return OperatorType::NOTEQUAL;
 
-        //additive
-        case TokenType::PLUS: return OperatorType::PLUS;
-        case TokenType::MINUS: return OperatorType::MINUS;
+        // additive
+        case TokenType::PLUS:
+            return OperatorType::PLUS;
+        case TokenType::MINUS:
+            return OperatorType::MINUS;
 
-        //multiplicative
-        case TokenType::STAR: return OperatorType::STAR;
-        case TokenType::SLASH: return OperatorType::SLASH;
-        case TokenType::DOUBLESLASH: return OperatorType::DOUBLESLASH;
-        case TokenType::MODULO: return OperatorType::MODULO;
+        // multiplicative
+        case TokenType::STAR:
+            return OperatorType::STAR;
+        case TokenType::SLASH:
+            return OperatorType::SLASH;
+        case TokenType::DOUBLESLASH:
+            return OperatorType::DOUBLESLASH;
+        case TokenType::MODULO:
+            return OperatorType::MODULO;
 
         default:
-            //never supposed to happen
+            // never supposed to happen
             throw std::runtime_error("unexpected operator");
     }
 }
@@ -57,11 +75,12 @@ std::unique_ptr<ASTExprNode> ExprParser::parseExpr() {
 std::unique_ptr<ASTExprNode> ExprParser::parseLogicalOr() {
     auto lhs = parseLogicalAnd();
 
-    //left associative
+    // left associative
     while (match(TokenType::OR)) {
         advance();
         auto rhs = parseLogicalAnd();
-        lhs = std::make_unique<BinaryOperatorNode>(OperatorType::OR, std::move(lhs), std::move(rhs));
+        lhs =
+            std::make_unique<BinaryOperatorNode>(OperatorType::OR, std::move(lhs), std::move(rhs));
     }
 
     return std::move(lhs);
@@ -70,18 +89,19 @@ std::unique_ptr<ASTExprNode> ExprParser::parseLogicalOr() {
 std::unique_ptr<ASTExprNode> ExprParser::parseLogicalAnd() {
     auto lhs = parseLogicalNot();
 
-    //left associative
+    // left associative
     while (match(TokenType::AND)) {
         advance();
         auto rhs = parseLogicalNot();
-        lhs = std::make_unique<BinaryOperatorNode>(OperatorType::AND, std::move(lhs), std::move(rhs));
+        lhs =
+            std::make_unique<BinaryOperatorNode>(OperatorType::AND, std::move(lhs), std::move(rhs));
     }
 
     return std::move(lhs);
 }
 
 std::unique_ptr<ASTExprNode> ExprParser::parseLogicalNot() {
-    //right associative
+    // right associative
     if (match(TokenType::NOT)) {
         advance();
         auto rhs = parseLogicalNot();
@@ -94,19 +114,15 @@ std::unique_ptr<ASTExprNode> ExprParser::parseLogicalNot() {
 std::unique_ptr<ASTExprNode> ExprParser::parseComparison() {
     auto lhs = parseAdditive();
 
-    //left associative
-    while (
-        match(TokenType::GREATERTHAN) ||
-        match(TokenType::LESSTHAN) ||
-        match(TokenType::GREATEREQUAL) ||
-        match(TokenType::LESSEQUAL) ||
-        match(TokenType::EQEQUAL) ||
-        match(TokenType::NOTEQUAL)
-    ) {
+    // left associative
+    while (match(TokenType::GREATERTHAN) || match(TokenType::LESSTHAN) ||
+           match(TokenType::GREATEREQUAL) || match(TokenType::LESSEQUAL) ||
+           match(TokenType::EQEQUAL) || match(TokenType::NOTEQUAL)) {
         TokenType type = peek().type;
         advance();
         auto rhs = parseAdditive();
-        lhs = std::make_unique<BinaryOperatorNode>(toOperatorType(type), std::move(lhs), std::move(rhs));
+        lhs      = std::make_unique<BinaryOperatorNode>(toOperatorType(type), std::move(lhs),
+                                                        std::move(rhs));
     }
 
     return std::move(lhs);
@@ -115,15 +131,13 @@ std::unique_ptr<ASTExprNode> ExprParser::parseComparison() {
 std::unique_ptr<ASTExprNode> ExprParser::parseAdditive() {
     auto lhs = parseMultiplicative();
 
-    //left associative
-    while (
-        match(TokenType::PLUS) ||
-        match(TokenType::MINUS)
-    ) {
+    // left associative
+    while (match(TokenType::PLUS) || match(TokenType::MINUS)) {
         TokenType type = peek().type;
         advance();
         auto rhs = parseMultiplicative();
-        lhs = std::make_unique<BinaryOperatorNode>(toOperatorType(type), std::move(lhs), std::move(rhs));
+        lhs      = std::make_unique<BinaryOperatorNode>(toOperatorType(type), std::move(lhs),
+                                                        std::move(rhs));
     }
 
     return std::move(lhs);
@@ -132,28 +146,22 @@ std::unique_ptr<ASTExprNode> ExprParser::parseAdditive() {
 std::unique_ptr<ASTExprNode> ExprParser::parseMultiplicative() {
     auto lhs = parseUnary();
 
-    //left associative
-    while (
-        match(TokenType::STAR) ||
-        match(TokenType::SLASH) ||
-        match(TokenType::DOUBLESLASH) ||
-        match(TokenType::MODULO)
-    ) {
+    // left associative
+    while (match(TokenType::STAR) || match(TokenType::SLASH) || match(TokenType::DOUBLESLASH) ||
+           match(TokenType::MODULO)) {
         TokenType type = peek().type;
         advance();
         auto rhs = parseUnary();
-        lhs = std::make_unique<BinaryOperatorNode>(toOperatorType(type), std::move(lhs), std::move(rhs));
+        lhs      = std::make_unique<BinaryOperatorNode>(toOperatorType(type), std::move(lhs),
+                                                        std::move(rhs));
     }
 
     return std::move(lhs);
 }
 
 std::unique_ptr<ASTExprNode> ExprParser::parseUnary() {
-    //right associative
-    if (
-        match(TokenType::PLUS) ||
-        match(TokenType::MINUS)
-    ) {
+    // right associative
+    if (match(TokenType::PLUS) || match(TokenType::MINUS)) {
         TokenType type = peek().type;
         advance();
         auto rhs = parseUnary();

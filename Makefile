@@ -33,10 +33,16 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 #for change in header files
 -include $(DEPS)
 
-.PHONY: all clean run
+.PHONY: all clean run format check-format
 
 run: all
 	./$(BUILD_DIR)/$(TARGET_EXEC)
 
 clean:
 	rm -rf $(BUILD_DIR)
+
+format:
+	find $(SRC_DIR)/ -name '*.cpp' -o -name '*.h' | xargs clang-format -i
+
+check-format:
+	find $(SRC_DIR)/ -name '*.cpp' -o -name '*.h' | xargs clang-format --dry-run --Werror
