@@ -5,26 +5,24 @@
 #include <memory>
 
 #include "token.hpp"
-#include "ast.hpp"
+#include "astexpr.hpp"
 
 class ExprParser {
 public:
     ExprParser(std::vector<Token> tokens);
-    std::unique_ptr<ASTNode> parseExpr();
-    std::unique_ptr<ASTNode> parseExprStmt();
+    std::unique_ptr<ASTExprNode> parseExpr();
 
 private:
     //precedence parsing(from highest precedence to lowest precedence)
-    std::unique_ptr<ASTNode> parsePrimary();
-    std::unique_ptr<ASTNode> parsePower();
-    std::unique_ptr<ASTNode> parseUnary();
-    std::unique_ptr<ASTNode> parseMultiplicative();
-    std::unique_ptr<ASTNode> parseAdditive();
-    std::unique_ptr<ASTNode> parseComparison();
-    std::unique_ptr<ASTNode> parseLogicalNot();
-    std::unique_ptr<ASTNode> parseLogicalAnd();
-    std::unique_ptr<ASTNode> parseLogicalOr();
-    std::unique_ptr<ASTNode> parseAssignment();
+    std::unique_ptr<ASTExprNode> parsePrimary();
+    std::unique_ptr<ASTExprNode> parsePower();
+    std::unique_ptr<ASTExprNode> parseUnary();
+    std::unique_ptr<ASTExprNode> parseMultiplicative();
+    std::unique_ptr<ASTExprNode> parseAdditive();
+    std::unique_ptr<ASTExprNode> parseComparison();
+    std::unique_ptr<ASTExprNode> parseLogicalNot();
+    std::unique_ptr<ASTExprNode> parseLogicalAnd();
+    std::unique_ptr<ASTExprNode> parseLogicalOr();
 
     //helpers
     Token peek();
