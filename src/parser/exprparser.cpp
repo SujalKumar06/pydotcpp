@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-ExprParser::ExprParser(std::vector<Token> tokens) : tokens(tokens) {}
+ExprParser::ExprParser(std::vector<Token> tokens) : tokens(std::move(tokens)) {}
 
 Token ExprParser::peek() {
     if (index < tokens.size())
@@ -18,16 +18,13 @@ Token ExprParser::peekNext() {
         return tokens.back();  // EOF token
 }
 
-void advance() {
+void ExprParser::advance() {
     if (index < tokens.size())
         index++;
 }
 
 bool ExprParser::match(TokenType type) {
-    if (index < tokens.size() && peek().type == type)
-        return true;
-    else
-        return false;
+    return peek().type == type;
 }
 
 OperatorType ExprParser::toOperatorType(TokenType type) {
@@ -83,7 +80,7 @@ std::unique_ptr<ASTExprNode> ExprParser::parseLogicalOr() {
             std::make_unique<BinaryOperatorNode>(OperatorType::OR, std::move(lhs), std::move(rhs));
     }
 
-    return std::move(lhs);
+    return lhs;
 }
 
 std::unique_ptr<ASTExprNode> ExprParser::parseLogicalAnd() {
@@ -97,7 +94,7 @@ std::unique_ptr<ASTExprNode> ExprParser::parseLogicalAnd() {
             std::make_unique<BinaryOperatorNode>(OperatorType::AND, std::move(lhs), std::move(rhs));
     }
 
-    return std::move(lhs);
+    return lhs;
 }
 
 std::unique_ptr<ASTExprNode> ExprParser::parseLogicalNot() {
@@ -125,7 +122,7 @@ std::unique_ptr<ASTExprNode> ExprParser::parseComparison() {
                                                         std::move(rhs));
     }
 
-    return std::move(lhs);
+    return lhs;
 }
 
 std::unique_ptr<ASTExprNode> ExprParser::parseAdditive() {
@@ -140,7 +137,7 @@ std::unique_ptr<ASTExprNode> ExprParser::parseAdditive() {
                                                         std::move(rhs));
     }
 
-    return std::move(lhs);
+    return lhs;
 }
 
 std::unique_ptr<ASTExprNode> ExprParser::parseMultiplicative() {
@@ -156,7 +153,7 @@ std::unique_ptr<ASTExprNode> ExprParser::parseMultiplicative() {
                                                         std::move(rhs));
     }
 
-    return std::move(lhs);
+    return lhs;
 }
 
 std::unique_ptr<ASTExprNode> ExprParser::parseUnary() {
@@ -168,7 +165,20 @@ std::unique_ptr<ASTExprNode> ExprParser::parseUnary() {
         return std::make_unique<UnaryOperatorNode>(toOperatorType(type), std::move(rhs));
     }
 
-    return parsePrimary();
+    return parsePower();
+}
+
+std::unique_ptr<ASTExprNode> ExprParser::parsePower() {
+    auto lhs = parsePrimary();
+
+    // right associative
+    if (match(TokenType::POWER)) {
+        advance();
+        auto rhs = parseUnary();
+        return std::make_unique<BinaryOperatorNode>(OperatorType::POWER, std::move(lhs), std::move(rhs));
+    }
+
+    return lhs;
 }
 
 std::unique_ptr<ASTExprNode> ExprParser::parsePrimary() {
@@ -184,22 +194,23 @@ std::unique_ptr<ASTExprNode> ExprParser::parsePrimary() {
         return expr;
     }
 
-    token = peek();
+    Token token = peek();
     advance();
     switch (token.type) {
-        case TokenType::NUMBER:
+        case TokenType::NUMBER: {
             double value = std::stod(token.value);
-            return make_unique<NumberNode>(value);
+            return std::make_unique<NumberNode>(value);
+        }
         case TokenType::STRING:
-            return make_unique<StringNode>(std::move(token.value));
+            return std::make_unique<StringNode>(std::move(token.value));
         case TokenType::TRUE:
-            return make_unique<BooleanNode>(true);
+            return std::make_unique<BooleanNode>(true);
         case TokenType::FALSE:
-            return make_unique<BooleanNode>(false);
+            return std::make_unique<BooleanNode>(false);
         case TokenType::NONE:
-            return make_unique<NoneNode>();
+            return std::make_unique<NoneNode>();
         case TokenType::REFERENCE:
-            return make_unique<ReferenceNode>(std::move(token.value));
+            return std::make_unique<ReferenceNode>(std::move(token.value));
         default:
             throw std::runtime_error("invalid token found");
     }

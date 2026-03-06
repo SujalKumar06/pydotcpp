@@ -32,5 +32,5 @@ private:
     OperatorType toOperatorType(TokenType type);
 
     //index in the token vector
-    int index;
+    int index = 0;
 };
