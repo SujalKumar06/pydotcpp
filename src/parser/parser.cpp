@@ -66,12 +66,12 @@ private:
 
     std::unique_ptr<ASTNode> parseWhileStatement() {
         //parse while statement
-        //NOTE: Haven't added ASTNodes for this yet, I'll add it in a few hours, dinner time
+        //connect the while statement to the condition for looping and the block of code it will run
     }
 
     std::unique_ptr<ASTNode> parseForStatement() {
         //parse for statement
-        //NOTE: Haven't added ASTNodes for this yet, I'll add it in a few hours, dinner time
+        //connect the for statement to the condition for looping and the block of code it will run
     }
 
     std::unique_ptr<ASTNode> parseExpressionStatement() {
