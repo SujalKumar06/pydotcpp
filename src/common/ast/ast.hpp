@@ -17,6 +17,8 @@ enum class ASTNodeType {
     IF_STMT,    //if statement. Points to condition (BINARY or UNARY or other relevant nodes) and BLOCK
     ELIF_STMT, //elif statement. Points to BLOCK
     ELSE_STMT,  //else statement. Points to BLOCK
+    WHILE_STMT, //while block. Points to condition and BLOCK
+    FOR_STMT, //for block. Points to condition for looping and BLOCK
     BLOCK,  //reference to a vector of ASTNodes that are in a block
     PROGRAM //root node
 };
@@ -154,6 +156,22 @@ public:
     ElseStmtNode(std::unique_ptr<ASTNode> block);
 
     std::unique_ptr<ASTNode> block;
+};
+
+class WhileStmtNode : public ASTNode {
+public:
+    WhileStmtNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<ASTNode> block);
+
+    std::unique_ptr<ASTNode> block;
+    std::unique_ptr<ASTNode> condition;
+};
+
+class ForStmtNode : public ASTNode {
+public:
+    ForStmtNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<ASTNode> block);
+
+    std::unique_ptr<ASTNode> block;
+    std::unique_ptr<ASTNode> condition;
 };
 
 class BlockNode : public ASTNode {

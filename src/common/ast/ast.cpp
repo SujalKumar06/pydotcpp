@@ -44,6 +44,12 @@ ElifStmtNode::ElifStmtNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<A
 ElseStmtNode::ElseStmtNode(std::unique_ptr<ASTNode> block)
     : ASTNode(ASTNodeType::ELSE_STMT), block(std::move(block)) {}
 
+WhileStmtNode::WhileStmtNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<ASTNode> block)
+    : ASTNode(ASTNodeType::WHILE_STMT), condition(std::move(condition)), block(std::move(block)) {}
+
+ForStmtNode::ForStmtNode(std::unique_ptr<ASTNode> condition, std::unique_ptr<ASTNode> block)
+    : ASTNode(ASTNodeType::FOR_STMT), condition(std::move(condition)), block(std::move(block)) {}
+
 BlockNode::BlockNode()
     : ASTNode(ASTNodeType::BLOCK) {}
 
