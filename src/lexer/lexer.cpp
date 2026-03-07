@@ -97,22 +97,20 @@ void Lexer::scanNumber(std::string num) {
     }
 
     if ((peek() == 'e' || peek() == 'E')) {  // scientific notation
-        advance();
+        num += advance();
         if (!std::isdigit(peek()) && peek() != '+' && peek() != '-') {
             // throw an error - invalid syntax
         }
-        std::string power = "";  // power can only be an integer in scientific notation in python
+        // power can only be an integer in scientific notation in python
         if (peek() == '+' || peek() == '-') {
             if (!std::isdigit(peekNext())) {
                 // throw an error - invalid syntax
             }
-            power += advance();
+            num += advance();
         }
         while (std::isdigit(peek())) {
-            power += advance();
+            num += advance();
         }
-        num = std::to_string(std::stod(num) *
-                             std::pow(10, std::stod(power)));  // scientific -> decimal
     }
 
     if (std::isalnum(peek()) || peek() == '_' || peek() == '.') {
@@ -269,6 +267,7 @@ std::vector<Token> Lexer::scan_Tokens() {
             } else if (std::isalpha(curr[0]) || curr[0] == '_') {  // _foo is also valid
                 scanIdentifier(curr);
             } else if (curr[0] == '#') {  // comment, ignore everything until newline or EOF
+                curr = "";
                 while (peek() != '\n' && peek() != '\0') {
                     advance();
                 }

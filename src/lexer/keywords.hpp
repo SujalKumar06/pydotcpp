@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "token.hpp"
+#include "common/token/token.hpp"
 
 inline const std::unordered_map<std::string, TokenType> keywords = {
     {"def",      TokenType::DEF},
@@ -56,6 +56,6 @@ inline const std::unordered_map<std::string, TokenType> delimiters = {
     {")",  TokenType::RPAREN},
     {",",  TokenType::COMMA},
     {":",  TokenType::COLON},
-    {"#",  TokenType::COMMENT},
+//    {"#",  TokenType::COMMENT},
     {"\n", TokenType::NEWLINE},
 };
