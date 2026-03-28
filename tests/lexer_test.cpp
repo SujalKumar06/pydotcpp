@@ -26,96 +26,98 @@ void test(std::string input_code, std::vector<std::pair<TokenType, std::string>>
 int main() {
     // ─── Keywords ────────────────────────────────────────────────────────────────
 
-    test("if",       {{TokenType::IF,       "if"},       {TokenType::EOF_TOKEN, ""}});
-    test("elif",     {{TokenType::ELIF,     "elif"},     {TokenType::EOF_TOKEN, ""}});
-    test("else",     {{TokenType::ELSE,     "else"},     {TokenType::EOF_TOKEN, ""}});
-    test("while",    {{TokenType::WHILE,    "while"},    {TokenType::EOF_TOKEN, ""}});
-    test("break",    {{TokenType::BREAK,    "break"},    {TokenType::EOF_TOKEN, ""}});
-    test("continue", {{TokenType::CONTINUE, "continue"}, {TokenType::EOF_TOKEN, ""}});
-    test("pass",     {{TokenType::PASS,     "pass"},     {TokenType::EOF_TOKEN, ""}});
-    test("and",      {{TokenType::AND,      "and"},      {TokenType::EOF_TOKEN, ""}});
-    test("or",       {{TokenType::OR,       "or"},       {TokenType::EOF_TOKEN, ""}});
-    test("not",      {{TokenType::NOT,      "not"},      {TokenType::EOF_TOKEN, ""}});
-    test("in",       {{TokenType::IN,       "in"},       {TokenType::EOF_TOKEN, ""}});
-    test("is",       {{TokenType::IS,       "is"},       {TokenType::EOF_TOKEN, ""}});
-    test("True",     {{TokenType::TRUE,     "True"},     {TokenType::EOF_TOKEN, ""}});
-    test("False",    {{TokenType::FALSE,    "False"},    {TokenType::EOF_TOKEN, ""}});
-    test("None",     {{TokenType::NONE,     "None"},     {TokenType::EOF_TOKEN, ""}});
-    test("print",    {{TokenType::PRINT,    "print"},    {TokenType::EOF_TOKEN, ""}});
+    test("if",       {{TokenType::IF,       "if"},       {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("elif",     {{TokenType::ELIF,     "elif"},     {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("else",     {{TokenType::ELSE,     "else"},     {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("while",    {{TokenType::WHILE,    "while"},    {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("break",    {{TokenType::BREAK,    "break"},    {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("continue", {{TokenType::CONTINUE, "continue"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("pass",     {{TokenType::PASS,     "pass"},     {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("and",      {{TokenType::AND,      "and"},      {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("or",       {{TokenType::OR,       "or"},       {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("not",      {{TokenType::NOT,      "not"},      {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("in",       {{TokenType::IN,       "in"},       {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("is",       {{TokenType::IS,       "is"},       {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("True",     {{TokenType::TRUE,     "True"},     {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("False",    {{TokenType::FALSE,    "False"},    {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("None",     {{TokenType::NONE,     "None"},     {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("print",    {{TokenType::PRINT,    "print"},    {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
 
     // Keywords must not match as part of a longer identifier
-    test("iffy",      {{TokenType::IDENTIFIER, "iffy"},      {TokenType::EOF_TOKEN, ""}});
-    test("whileTrue", {{TokenType::IDENTIFIER, "whileTrue"}, {TokenType::EOF_TOKEN, ""}});
-    test("breakdown", {{TokenType::IDENTIFIER, "breakdown"}, {TokenType::EOF_TOKEN, ""}});
-    test("andor",     {{TokenType::IDENTIFIER, "andor"},     {TokenType::EOF_TOKEN, ""}});
-    test("Truthy",    {{TokenType::IDENTIFIER, "Truthy"},    {TokenType::EOF_TOKEN, ""}});
-    test("None2",     {{TokenType::IDENTIFIER, "None2"},     {TokenType::EOF_TOKEN, ""}});
+    test("iffy",      {{TokenType::IDENTIFIER, "iffy"},      {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("whileTrue", {{TokenType::IDENTIFIER, "whileTrue"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("breakdown", {{TokenType::IDENTIFIER, "breakdown"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("andor",     {{TokenType::IDENTIFIER, "andor"},     {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("Truthy",    {{TokenType::IDENTIFIER, "Truthy"},    {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("None2",     {{TokenType::IDENTIFIER, "None2"},     {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
 
-    // ─── Identifiers ─────────────────────────────────────────────────────────────
+    // ─── Identifiers ─────────────────────────────────────────────────────────────────
 
-    test("x",         {{TokenType::IDENTIFIER, "x"},         {TokenType::EOF_TOKEN, ""}});
-    test("myVar",     {{TokenType::IDENTIFIER, "myVar"},     {TokenType::EOF_TOKEN, ""}});
-    test("_private",  {{TokenType::IDENTIFIER, "_private"},  {TokenType::EOF_TOKEN, ""}});
-    test("__dunder",  {{TokenType::IDENTIFIER, "__dunder"},  {TokenType::EOF_TOKEN, ""}});
-    test("var123",    {{TokenType::IDENTIFIER, "var123"},    {TokenType::EOF_TOKEN, ""}});
-    test("CamelCase", {{TokenType::IDENTIFIER, "CamelCase"}, {TokenType::EOF_TOKEN, ""}});
-    test("ALL_CAPS",  {{TokenType::IDENTIFIER, "ALL_CAPS"},  {TokenType::EOF_TOKEN, ""}});
+    test("x",         {{TokenType::IDENTIFIER, "x"},         {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("myVar",     {{TokenType::IDENTIFIER, "myVar"},     {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("_private",  {{TokenType::IDENTIFIER, "_private"},  {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("__dunder",  {{TokenType::IDENTIFIER, "__dunder"},  {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("var123",    {{TokenType::IDENTIFIER, "var123"},    {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("CamelCase", {{TokenType::IDENTIFIER, "CamelCase"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("ALL_CAPS",  {{TokenType::IDENTIFIER, "ALL_CAPS"},  {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
 
     // ─── Numbers ─────────────────────────────────────────────────────────────────
 
-    test("0",       {{TokenType::NUMBER, "0"},       {TokenType::EOF_TOKEN, ""}});
-    test("1",       {{TokenType::NUMBER, "1"},       {TokenType::EOF_TOKEN, ""}});
-    test("42",      {{TokenType::NUMBER, "42"},      {TokenType::EOF_TOKEN, ""}});
-    test("1000",    {{TokenType::NUMBER, "1000"},    {TokenType::EOF_TOKEN, ""}});
-    test("3.14",    {{TokenType::NUMBER, "3.14"},    {TokenType::EOF_TOKEN, ""}});
-    test("0.5",     {{TokenType::NUMBER, "0.5"},     {TokenType::EOF_TOKEN, ""}});
-    test("100.001", {{TokenType::NUMBER, "100.001"}, {TokenType::EOF_TOKEN, ""}});
+    test("0",       {{TokenType::NUMBER, "0"},       {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("1",       {{TokenType::NUMBER, "1"},       {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("42",      {{TokenType::NUMBER, "42"},      {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("1000",    {{TokenType::NUMBER, "1000"},    {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("3.14",    {{TokenType::NUMBER, "3.14"},    {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("0.5",     {{TokenType::NUMBER, "0.5"},     {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("100.001", {{TokenType::NUMBER, "100.001"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
 
     // ─── Strings ─────────────────────────────────────────────────────────────────
 
-    test(R"("")",           {{TokenType::STRING, "\"\""},           {TokenType::EOF_TOKEN, ""}});
-    test(R"('')",           {{TokenType::STRING, "''"},             {TokenType::EOF_TOKEN, ""}});
-    test(R"("hello")",      {{TokenType::STRING, "\"hello\""},      {TokenType::EOF_TOKEN, ""}});
-    test(R"('hello')",      {{TokenType::STRING, "'hello'"},        {TokenType::EOF_TOKEN, ""}});
-    test(R"("hello world")",{{TokenType::STRING, "\"hello world\""},{TokenType::EOF_TOKEN, ""}});
-    test(R"("123")",        {{TokenType::STRING, "\"123\""},        {TokenType::EOF_TOKEN, ""}});
-    test(R"("it's")",       {{TokenType::STRING, "\"it's\""},       {TokenType::EOF_TOKEN, ""}});
-    test(R"('say "hi"')",   {{TokenType::STRING, "'say \"hi\"'"},   {TokenType::EOF_TOKEN, ""}});
-    test(R"("!@#$%")",      {{TokenType::STRING, "\"!@#$%\""},      {TokenType::EOF_TOKEN, ""}});
+    test(R"("")",           {{TokenType::STRING, "\"\""},           {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test(R"('')",           {{TokenType::STRING, "''"},             {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test(R"("hello")",      {{TokenType::STRING, "\"hello\""},      {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test(R"('hello')",      {{TokenType::STRING, "'hello'"},        {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test(R"("hello world")",{{TokenType::STRING, "\"hello world\""},{TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test(R"("123")",        {{TokenType::STRING, "\"123\""},        {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test(R"("it's")",       {{TokenType::STRING, "\"it's\""},       {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test(R"('say "hi"')",   {{TokenType::STRING, "'say \"hi\"'"},   {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test(R"("!@#$%")",      {{TokenType::STRING, "\"!@#$%\""},      {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
 
     // ─── Operators — single ──────────────────────────────────────────────────────
 
-    test("+", {{TokenType::PLUS,        "+"}, {TokenType::EOF_TOKEN, ""}});
-    test("-", {{TokenType::MINUS,       "-"}, {TokenType::EOF_TOKEN, ""}});
-    test("*", {{TokenType::STAR,        "*"}, {TokenType::EOF_TOKEN, ""}});
-    test("/", {{TokenType::SLASH,       "/"}, {TokenType::EOF_TOKEN, ""}});
-    test("%", {{TokenType::MODULO,      "%"}, {TokenType::EOF_TOKEN, ""}});
-    test("=", {{TokenType::ASSIGN,      "="}, {TokenType::EOF_TOKEN, ""}});
-    test(">", {{TokenType::GREATERTHAN, ">"}, {TokenType::EOF_TOKEN, ""}});
-    test("<", {{TokenType::LESSERTHAN,  "<"}, {TokenType::EOF_TOKEN, ""}});
-    test("&", {{TokenType::AMPERSAND,   "&"}, {TokenType::EOF_TOKEN, ""}});
-    test("|", {{TokenType::PIPE,        "|"}, {TokenType::EOF_TOKEN, ""}});
+    test("+", {{TokenType::PLUS,        "+"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("-", {{TokenType::MINUS,       "-"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("*", {{TokenType::STAR,        "*"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("/", {{TokenType::SLASH,       "/"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("%", {{TokenType::MODULO,      "%"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("=", {{TokenType::ASSIGN,      "="}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test(">", {{TokenType::GREATERTHAN, ">"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("<", {{TokenType::LESSERTHAN,  "<"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("&", {{TokenType::AMPERSAND,   "&"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("|", {{TokenType::PIPE,        "|"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
 
     // ─── Operators — compound (must not be split into two single tokens) ──────────
 
-    test("//", {{TokenType::FLOORDIV,     "//"}, {TokenType::EOF_TOKEN, ""}});
-    test("**", {{TokenType::POWER,        "**"}, {TokenType::EOF_TOKEN, ""}});
-    test(">=", {{TokenType::GREATEREQUAL, ">="}, {TokenType::EOF_TOKEN, ""}});
-    test("<=", {{TokenType::LESSEQUAL,    "<="}, {TokenType::EOF_TOKEN, ""}});
-    test("==", {{TokenType::EQEQUAL,      "=="}, {TokenType::EOF_TOKEN, ""}});
-    test("!=", {{TokenType::NOTEQUAL,     "!="}, {TokenType::EOF_TOKEN, ""}});
-    test("+=", {{TokenType::PLUSEQUAL,    "+="}, {TokenType::EOF_TOKEN, ""}});
-    test("-=", {{TokenType::MINUSEQUAL,   "-="}, {TokenType::EOF_TOKEN, ""}});
-    test("*=", {{TokenType::STAREQUAL,    "*="}, {TokenType::EOF_TOKEN, ""}});
-    test("/=", {{TokenType::SLASHEQUAL,   "/="}, {TokenType::EOF_TOKEN, ""}});
+    test("//", {{TokenType::FLOORDIV,     "//"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("**", {{TokenType::POWER,        "**"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test(">=", {{TokenType::GREATEREQUAL, ">="}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("<=", {{TokenType::LESSEQUAL,    "<="}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("==", {{TokenType::EQEQUAL,      "=="}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("!=", {{TokenType::NOTEQUAL,     "!="}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("+=", {{TokenType::PLUSEQUAL,    "+="}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("-=", {{TokenType::MINUSEQUAL,   "-="}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("*=", {{TokenType::STAREQUAL,    "*="}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
+    test("/=", {{TokenType::SLASHEQUAL,   "/="}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
 
     // ─── Comments ────────────────────────────────────────────────────────────────
 
     test("# this is a comment", {
-        {TokenType::EOF_TOKEN, ""}});
+        {TokenType::NEWLINE,    "\n"},
+        {TokenType::EOF_TOKEN,  ""}});
 
     test("x # inline comment", {
         {TokenType::IDENTIFIER, "x"},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     // ─── Expressions ─────────────────────────────────────────────────────────────
@@ -124,6 +126,7 @@ int main() {
         {TokenType::IDENTIFIER, "x"},
         {TokenType::PLUS,       "+"},
         {TokenType::IDENTIFIER, "y"},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     test("a * b + c", {
@@ -132,18 +135,21 @@ int main() {
         {TokenType::IDENTIFIER, "b"},
         {TokenType::PLUS,       "+"},
         {TokenType::IDENTIFIER, "c"},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     test("x ** 2", {
         {TokenType::IDENTIFIER, "x"},
         {TokenType::POWER,      "**"},
         {TokenType::NUMBER,     "2"},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     test("10 // 3", {
         {TokenType::NUMBER,    "10"},
         {TokenType::FLOORDIV,  "//"},
         {TokenType::NUMBER,    "3"},
+        {TokenType::NEWLINE,   "\n"},
         {TokenType::EOF_TOKEN, ""}});
 
     test("x % 2 == 0", {
@@ -152,6 +158,7 @@ int main() {
         {TokenType::NUMBER,     "2"},
         {TokenType::EQEQUAL,    "=="},
         {TokenType::NUMBER,     "0"},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     test("not x and y or z", {
@@ -161,18 +168,21 @@ int main() {
         {TokenType::IDENTIFIER, "y"},
         {TokenType::OR,         "or"},
         {TokenType::IDENTIFIER, "z"},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     test("x is None", {
         {TokenType::IDENTIFIER, "x"},
         {TokenType::IS,         "is"},
         {TokenType::NONE,       "None"},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     test("x in y", {
         {TokenType::IDENTIFIER, "x"},
         {TokenType::IN,         "in"},
         {TokenType::IDENTIFIER, "y"},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     test("(x + y)", {
@@ -181,6 +191,7 @@ int main() {
         {TokenType::PLUS,       "+"},
         {TokenType::IDENTIFIER, "y"},
         {TokenType::RPAREN,     ")"},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     // ─── Assignment ──────────────────────────────────────────────────────────────
@@ -189,42 +200,49 @@ int main() {
         {TokenType::IDENTIFIER, "x"},
         {TokenType::ASSIGN,     "="},
         {TokenType::NUMBER,     "5"},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     test("x = \"hello\"", {
         {TokenType::IDENTIFIER, "x"},
         {TokenType::ASSIGN,     "="},
         {TokenType::STRING,     "\"hello\""},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     test("x = True", {
         {TokenType::IDENTIFIER, "x"},
         {TokenType::ASSIGN,     "="},
         {TokenType::TRUE,       "True"},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     test("x += 1", {
         {TokenType::IDENTIFIER, "x"},
         {TokenType::PLUSEQUAL,  "+="},
         {TokenType::NUMBER,     "1"},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     test("x -= 1", {
         {TokenType::IDENTIFIER, "x"},
         {TokenType::MINUSEQUAL, "-="},
         {TokenType::NUMBER,     "1"},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     test("x *= 2", {
         {TokenType::IDENTIFIER, "x"},
         {TokenType::STAREQUAL,  "*="},
         {TokenType::NUMBER,     "2"},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     test("x /= 2", {
         {TokenType::IDENTIFIER, "x"},
         {TokenType::SLASHEQUAL, "/="},
         {TokenType::NUMBER,     "2"},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     // ─── Print ───────────────────────────────────────────────────────────────────
@@ -234,6 +252,7 @@ int main() {
         {TokenType::LPAREN,     "("},
         {TokenType::IDENTIFIER, "x"},
         {TokenType::RPAREN,     ")"},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     test("print(\"hello\", x)", {
@@ -243,6 +262,7 @@ int main() {
         {TokenType::COMMA,      ","},
         {TokenType::IDENTIFIER, "x"},
         {TokenType::RPAREN,     ")"},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     // ─── Newline ─────────────────────────────────────────────────────────────────
@@ -251,6 +271,7 @@ int main() {
         {TokenType::IDENTIFIER, "x"},
         {TokenType::NEWLINE,    "\n"},
         {TokenType::IDENTIFIER, "y"},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     test("x = 1\ny = 2", {
@@ -261,6 +282,7 @@ int main() {
         {TokenType::IDENTIFIER, "y"},
         {TokenType::ASSIGN,     "="},
         {TokenType::NUMBER,     "2"},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     // ─── if / elif / else ────────────────────────────────────────────────────────
@@ -349,7 +371,6 @@ int main() {
         {TokenType::PASS,       "pass"},
         {TokenType::NEWLINE,    "\n"},
         {TokenType::DEDENT,     ""},
-        {TokenType::NEWLINE,    "\n"},
         {TokenType::DEDENT,     ""},
         {TokenType::EOF_TOKEN,  ""}});
 
@@ -442,6 +463,7 @@ int main() {
         {TokenType::DEDENT,     ""},
         {TokenType::DEDENT,     ""},
         {TokenType::IDENTIFIER, "x"},
+        {TokenType::NEWLINE,    "\n"},
         {TokenType::EOF_TOKEN,  ""}});
 
     // ─── Mixed: realistic snippets ───────────────────────────────────────────────
@@ -497,4 +519,6 @@ int main() {
         {TokenType::NEWLINE,    "\n"},
         {TokenType::DEDENT,     ""},
         {TokenType::EOF_TOKEN,  ""}});
+    std::cout << '\n' << "Total Passed : " << passed << '\n' << "Total Failed : " << failed << '\n';
+    return 0;
 }
