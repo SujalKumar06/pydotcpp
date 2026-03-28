@@ -153,9 +153,11 @@ std::vector<Token> Lexer::scan_Tokens() {
     while (true) {
         if (isAtEnd()) {
             // Give a \n before EOF
-            if (!tokens.empty() && tokens.back().type != TokenType::NEWLINE) {
+            if (tokens.empty() || tokens.back().type != TokenType::NEWLINE) {
                 Token newline_token(TokenType::NEWLINE, "\n", line, column);
                 tokens.push_back(newline_token);
+                line += 1;
+                column = 1;
             }
             // Fully dedent the stack before EOF
             while (indent_stack.size() > 1) {
