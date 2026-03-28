@@ -152,6 +152,17 @@ void Lexer::scanIdentifier(std::string identifier) {
 std::vector<Token> Lexer::scan_Tokens() {
     while (true) {
         if (isAtEnd()) {
+            // Give a \n before EOF
+            if (!tokens.empty() && tokens.back().type != TokenType::NEWLINE) {
+                Token newline_token(TokenType::NEWLINE, "\n", line, column);
+                tokens.push_back(newline_token);
+            }
+            // Fully dedent the stack before EOF
+            while (indent_stack.size() > 1) {
+                indent_stack.pop();
+                Token dedent_token(TokenType::DEDENT, "", line, column);
+                tokens.push_back(dedent_token);
+            }
             Token token(TokenType::EOF_TOKEN, "", line, column);
             tokens.push_back(token);
             break;
