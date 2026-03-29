@@ -44,8 +44,9 @@ enum class TokenType {
     MINUSEQUAL, // -=
     STAREQUAL, // *=
     SLASHEQUAL, // /=
-    // TODO: Add floorequal, powerequal and moduloequal
-    
+    FLOOREQUAL, // //=
+    POWEREQUAL, // **=
+    MODULOEQUAL, // %=
 
     LPAREN, // (
     RPAREN, // )

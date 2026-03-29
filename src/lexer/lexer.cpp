@@ -225,17 +225,36 @@ std::vector<Token> Lexer::scan_Tokens() {
             continue;
         }
 
+        if (curr == "%" && peek() == '=') {
+            advance();
+            Token token(TokenType::MODULOEQUAL, "%=", line, column - 2);
+            tokens.push_back(token);
+            continue;
+        }
+
         if (curr == "/" && peek() == '/') {
             advance();
-            Token token(TokenType::FLOORDIV, "//", line, column - 2);
-            tokens.push_back(token);
+            if (peek() == '=') {
+                advance();
+                Token token(TokenType::FLOOREQUAL, "//=", line, column - 3);
+                tokens.push_back(token);
+            } else {
+                Token token(TokenType::FLOORDIV, "//", line, column - 2);
+                tokens.push_back(token);
+            }
             continue;
         }
 
         if (curr == "*" && peek() == '*') {
             advance();
-            Token token(TokenType::POWER, "**", line, column - 2);
-            tokens.push_back(token);
+            if (peek() == '=') {
+                advance();
+                Token token(TokenType::POWEREQUAL, "**=", line, column - 3);
+                tokens.push_back(token);
+            } else {
+                Token token(TokenType::POWER, "**", line, column - 2);
+                tokens.push_back(token);
+            }
             continue;
         }
 
