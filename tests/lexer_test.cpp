@@ -1,29 +1,46 @@
 #include "lexer/lexer.hpp"
-
 #include <iostream>
+#include <vector>
+#include <string>
 
 int passed = 0;
 int failed = 0;
+std::vector<std::string> failure_messages;
 
 void test(std::string input_code, std::vector<std::pair<TokenType, std::string>> expected) {
     Lexer lexer(input_code);
     std::vector<Token> tokens = lexer.scan_Tokens();
 
     for (int i = 0; i < expected.size(); i++) {
-        if (tokens[i].type != expected[i].first ||
-            tokens[i].value != expected[i].second) {  // checks each token
-            std::cout << "FAIL: \"" << input_code << "\" - token " << i << " mismatch\n";
-            std::cout << "expected: " << expected[i].second << "\n";
-            std::cout << "got: " << tokens[i].value << "\n";
+        if (i >= tokens.size() || 
+            tokens[i].type != expected[i].first ||
+            tokens[i].value != expected[i].second) {  
+            
+            std::cout << "F" << std::flush;
+            
+            std::string error = "FAIL: \"" + input_code + "\"\n";
+            error += "  Token " + std::to_string(i) + " mismatch\n";
+            error += "  Expected: " + expected[i].second + "\n";
+            if (i < tokens.size()) {
+                error += "  Got:      " + tokens[i].value + "\n";
+            } else {
+                error += "  Got:      <missing token>\n";
+            }
+            
+            failure_messages.push_back(error);
             failed++;
             return;
         }
     }
-    std::cout << "PASS: \"" << input_code << "\"\n";
+    
+    std::cout << "." << std::flush;
     passed++;
 }
 
 int main() {
+    std::cout << "============================= test session starts ==============================\n";
+    std::cout << "collecting items...\n";
+
     // ─── Keywords ────────────────────────────────────────────────────────────────
 
     test("if",       {{TokenType::IF,       "if"},       {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
@@ -43,7 +60,6 @@ int main() {
     test("None",     {{TokenType::NONE,     "None"},     {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
     test("print",    {{TokenType::PRINT,    "print"},    {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
 
-    // Keywords must not match as part of a longer identifier
     test("iffy",      {{TokenType::IDENTIFIER, "iffy"},      {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
     test("whileTrue", {{TokenType::IDENTIFIER, "whileTrue"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
     test("breakdown", {{TokenType::IDENTIFIER, "breakdown"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
@@ -96,7 +112,7 @@ int main() {
     test("&", {{TokenType::AMPERSAND,   "&"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
     test("|", {{TokenType::PIPE,        "|"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
 
-    // ─── Operators — compound (must not be split into two single tokens) ──────────
+    // ─── Operators — compound ────────────────────────────────────────────────────
 
     test("//", {{TokenType::FLOORDIV,     "//"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
     test("**", {{TokenType::POWER,        "**"}, {TokenType::NEWLINE, "\n"}, {TokenType::EOF_TOKEN, ""}});
@@ -445,7 +461,7 @@ int main() {
         {TokenType::DEDENT,     ""},
         {TokenType::EOF_TOKEN,  ""}});
 
-    // ─── Indentation — multiple DEDENTs on a single line ─────────────────────────
+    // ─── Indentation ─────────────────────────────────────────────────────────────
 
     test("if x:\n    if y:\n        pass\nx", {
         {TokenType::IF,         "if"},
@@ -519,6 +535,23 @@ int main() {
         {TokenType::NEWLINE,    "\n"},
         {TokenType::DEDENT,     ""},
         {TokenType::EOF_TOKEN,  ""}});
-    std::cout << '\n' << "Total Passed : " << passed << '\n' << "Total Failed : " << failed << '\n';
-    return 0;
+
+    std::cout << "\n\n";
+
+    if (!failure_messages.empty()) {
+        std::cout << "=================================== FAILURES ===================================\n";
+        for (const auto& msg : failure_messages) {
+            std::cout << msg << "\n";
+        }
+    }
+
+    std::cout << "========================= ";
+    if (failed > 0) {
+        std::cout << failed << " failed, " << passed << " passed";
+    } else {
+        std::cout << passed << " passed";
+    }
+    std::cout << " =========================\n";
+
+    return failed > 0 ? 1 : 0; 
 }
