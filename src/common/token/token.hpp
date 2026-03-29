@@ -6,9 +6,21 @@ enum class TokenType {
     DEF,
     RETURN,
     IF,
+    ELIF,
     ELSE,
     FOR,
     WHILE,
+    BREAK,
+    CONTINUE,
+    PASS,
+    TRUE,
+    FALSE,
+    NONE,
+    AND,
+    OR,
+    NOT,
+    IN,
+    IS,
 
     IDENTIFIER,
     NUMBER,
@@ -18,10 +30,23 @@ enum class TokenType {
     MINUS, // -
     STAR, // *
     SLASH, // /
+    FLOORDIV, // //
+    POWER, // **
     ASSIGN, // =
     MODULO, // %
     GREATERTHAN, // >
     LESSERTHAN, // <
+    GREATEREQUAL, // >=
+    LESSEQUAL, // <=
+    EQEQUAL, // ==
+    NOTEQUAL, // !=
+    PLUSEQUAL, // +=
+    MINUSEQUAL, // -=
+    STAREQUAL, // *=
+    SLASHEQUAL, // /=
+    FLOOREQUAL, // //=
+    POWEREQUAL, // **=
+    MODULOEQUAL, // %=
 
     LPAREN, // (
     RPAREN, // )
@@ -33,7 +58,12 @@ enum class TokenType {
     COLON, // :
     INDENT,
     DEDENT,
-    COMMENT // #
+    COMMENT, // #
+    PRINT,
+    AMPERSAND, // &
+    PIPE, // |
+    XOR,
+    SPACE,
 };
 
 
@@ -50,8 +80,3 @@ public:
     // This constructor will allow us to easily make the tokens while coding
     Token(TokenType type, std::string val, int l, int c);
 };
-
-
-
-
-
