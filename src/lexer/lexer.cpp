@@ -29,10 +29,8 @@ char Lexer::peekNext() const {  // returns character at next index
 }
 
 char Lexer::advance() {  // returns character at current index and
-    if (isAtEnd()) {     // makes necessary changes to line and column
-        return '\0';
-    }
-    char c = source_code[current_index++];
+    char c = peek();
+    current_index++;
     if (c == '\n') {
         line++;
         column = 1;
@@ -71,7 +69,7 @@ void Lexer::processIndent() {  // maintains an indent stack and adds indent and 
             tokens.push_back(token);
         }
         if (indent_stack.empty()) {
-            // throw an error - invalid indentation
+            // TODO: throw an error - invalid indentation
         }
     }
 }
@@ -80,14 +78,14 @@ void Lexer::scanNumber(std::string num) {
     int start = column - 1;  // column of the number token
 
     if (num == "0" && std::isdigit(peek())) {
-        // throw an error, leading zero
+        // TODO: throw an error, leading zero
     }
 
     while (std::isdigit(peek())) {
         num += Lexer::advance();
     }
     if (peek() == '.' && num[0] == '.') {
-        // throw an error - we can have .23 and 23.23, but .23.23 is error
+        // TODO: throw an error - we can have .23 and 23.23, but .23.23 is error
     }
     if (peek() == '.' && std::isdigit(peekNext())) {  // for floating point numbers
         num += advance();
@@ -99,12 +97,12 @@ void Lexer::scanNumber(std::string num) {
     if ((peek() == 'e' || peek() == 'E')) {  // scientific notation
         num += advance();
         if (!std::isdigit(peek()) && peek() != '+' && peek() != '-') {
-            // throw an error - invalid syntax
+            // TODO: throw an error - invalid syntax
         }
         // power can only be an integer in scientific notation in python
         if (peek() == '+' || peek() == '-') {
             if (!std::isdigit(peekNext())) {
-                // throw an error - invalid syntax
+                // TODO: throw an error - invalid syntax
             }
             num += advance();
         }
@@ -114,7 +112,7 @@ void Lexer::scanNumber(std::string num) {
     }
 
     if (std::isalnum(peek()) || peek() == '_' || peek() == '.') {
-        // throw an error, invalid floating point number
+        // TODO: throw an error, invalid floating point number
     }
 
     Token token(TokenType::NUMBER, num, line, start);
@@ -127,9 +125,9 @@ void Lexer::scanString(std::string str) {
         str += advance();
     }
     if (isAtEnd()) {
-        // throw an error
+        // TODO: throw an error
     } else if (peek() == '\n') {
-        // throw an error
+        // TODO: throw an error
     } else {
         str += advance();
     }
@@ -248,7 +246,7 @@ std::vector<Token> Lexer::scan_Tokens() {
                 tokens.push_back(token);
                 continue;
             } else {
-                // throw an error
+                // TODO: throw an error
             }
         }
 
@@ -285,7 +283,7 @@ std::vector<Token> Lexer::scan_Tokens() {
                     advance();
                 }
             } else {
-                // throw an error - unexpected character
+                // TODO: throw an error - unexpected character
             }
         }
     }

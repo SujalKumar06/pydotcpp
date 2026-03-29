@@ -1,4 +1,4 @@
-#include "common/token/token.hpp"
+#include "token.hpp"
 
 #include <string>
 

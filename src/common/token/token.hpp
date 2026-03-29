@@ -44,6 +44,7 @@ enum class TokenType {
     MINUSEQUAL, // -=
     STAREQUAL, // *=
     SLASHEQUAL, // /=
+    // TODO: Add floorequal, powerequal and moduloequal
     
 
     LPAREN, // (
@@ -60,6 +61,7 @@ enum class TokenType {
     PRINT,
     AMPERSAND, // &
     PIPE, // |
+    XOR,
     SPACE,
 };
 
@@ -77,8 +79,3 @@ public:
     // This constructor will allow us to easily make the tokens while coding
     Token(TokenType type, std::string val, int l, int c);
 };
-
-
-
-
-

@@ -6,7 +6,7 @@
 #include <cctype> //to check if char is alphanumeric
 #include <stack>
 
-#include "common/token/token.hpp"
+#include "token.hpp"
 
 class Lexer {
 public:
