@@ -45,7 +45,7 @@ enum class OperatorType {
 class ASTExprNode {
 public:
     ASTExprNode(ASTExprNodeType type);
-    virtual ~ASTNode() = default;
+    virtual ~ASTExprNode() = default;
 
     //type
     ASTExprNodeType type;
@@ -89,12 +89,12 @@ public:
     BooleanNode(bool value);
 
     bool value;
-}
+};
 
 class NoneNode : public ASTExprNode {
 public:
     NoneNode();
-}
+};
 
 class ReferenceNode : public ASTExprNode {
 public:

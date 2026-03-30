@@ -1,5 +1,7 @@
 #include "aststmt.hpp"
 
+ASTStmtNode::ASTStmtNode(ASTStmtNodeType type) : type(type) {}
+
 VarDeclNode::VarDeclNode(std::unique_ptr<ASTExprNode> name, std::unique_ptr<ASTExprNode> value)
     : ASTStmtNode(ASTStmtNodeType::VAR_DECL), name(std::move(name)), value(std::move(value)) {}
 

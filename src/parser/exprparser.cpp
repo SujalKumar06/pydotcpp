@@ -32,8 +32,8 @@ OperatorType ExprParser::toOperatorType(TokenType type) {
         // comparison
         case TokenType::GREATERTHAN:
             return OperatorType::GREATERTHAN;
-        case TokenType::LESSTHAN:
-            return OperatorType::LESSTHAN;
+        case TokenType::LESSERTHAN:
+            return OperatorType::LESSERTHAN;
         case TokenType::GREATEREQUAL:
             return OperatorType::GREATEREQUAL;
         case TokenType::LESSEQUAL:
@@ -112,7 +112,7 @@ std::unique_ptr<ASTExprNode> ExprParser::parseComparison() {
     auto lhs = parseAdditive();
 
     // left associative
-    while (match(TokenType::GREATERTHAN) || match(TokenType::LESSTHAN) ||
+    while (match(TokenType::GREATERTHAN) || match(TokenType::LESSERTHAN) ||
            match(TokenType::GREATEREQUAL) || match(TokenType::LESSEQUAL) ||
            match(TokenType::EQEQUAL) || match(TokenType::NOTEQUAL)) {
         TokenType type = peek().type;
@@ -210,7 +210,7 @@ std::unique_ptr<ASTExprNode> ExprParser::parsePrimary() {
             return std::make_unique<BooleanNode>(false);
         case TokenType::NONE:
             return std::make_unique<NoneNode>();
-        case TokenType::REFERENCE:
+        case TokenType::IDENTIFIER:
             return std::make_unique<ReferenceNode>(std::move(token.value));
         default:
             throw std::runtime_error("invalid token found");
