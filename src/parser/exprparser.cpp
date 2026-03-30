@@ -54,8 +54,8 @@ OperatorType ExprParser::toOperatorType(TokenType type) {
             return OperatorType::STAR;
         case TokenType::SLASH:
             return OperatorType::SLASH;
-        case TokenType::DOUBLESLASH:
-            return OperatorType::DOUBLESLASH;
+        case TokenType::FLOORDIV:
+            return OperatorType::FLOORDIV;
         case TokenType::MODULO:
             return OperatorType::MODULO;
 
@@ -144,7 +144,7 @@ std::unique_ptr<ASTExprNode> ExprParser::parseMultiplicative() {
     auto lhs = parseUnary();
 
     // left associative
-    while (match(TokenType::STAR) || match(TokenType::SLASH) || match(TokenType::DOUBLESLASH) ||
+    while (match(TokenType::STAR) || match(TokenType::SLASH) || match(TokenType::FLOORDIV) ||
            match(TokenType::MODULO)) {
         TokenType type = peek().type;
         advance();

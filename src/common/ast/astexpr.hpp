@@ -34,7 +34,7 @@ enum class OperatorType {
     //multiplicative
     STAR, // *
     SLASH, // /
-    DOUBLESLASH, // //
+    FLOORDIV, // //
     MODULO, // %
 
     //power
