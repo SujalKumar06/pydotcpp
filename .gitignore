@@ -43,5 +43,6 @@ build/
 # debug information files
 *.dwo
 
-# vscode
+# editor-related
 .vscode
+.DS_STORE

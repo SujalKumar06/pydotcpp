@@ -32,5 +32,5 @@ private:
     OperatorType toOperatorType(TokenType type);
 
     std::vector<Token>& tokens;
-    int& index; //index in the token vector
+    int& index; //index in the token vector(reference to the index of StmtParser for consistency)
 };
