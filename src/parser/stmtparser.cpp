@@ -1,17 +1,17 @@
 #include "stmtparser.hpp"
 
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
 #include "token.hpp"
 
 StmtParser::StmtParser(std::vector<Token> tokens)
-    : tokens(std::move(tokens)), exprparser(this->tokens, index) {} 
+    : tokens(std::move(tokens)), exprparser(this->tokens, index) {}
 
 Token StmtParser::peek() {
     if (index < tokens.size())
         return tokens[index];
-    return tokens.back(); // EOF
+    return tokens.back();  // EOF
 }
 
 Token StmtParser::peekNext() {
@@ -29,7 +29,6 @@ std::unique_ptr<ProgramNode> StmtParser::parseProgram() {
     auto program = std::make_unique<ProgramNode>();
 
     while (peek().type != TokenType::EOF_TOKEN) {
-
         if (peek().type == TokenType::NEWLINE) {
             advance();
             continue;
@@ -42,7 +41,6 @@ std::unique_ptr<ProgramNode> StmtParser::parseProgram() {
 }
 
 std::unique_ptr<ASTStmtNode> StmtParser::parseStatement() {
-
     if (peek().type == TokenType::PRINT)
         return parsePrintStatement();
 
@@ -55,8 +53,7 @@ std::unique_ptr<ASTStmtNode> StmtParser::parseStatement() {
     if (peek().type == TokenType::FOR)
         return parseForStatement();
 
-    if (peek().type == TokenType::IDENTIFIER &&
-        peekNext().type == TokenType::ASSIGN)
+    if (peek().type == TokenType::IDENTIFIER && peekNext().type == TokenType::ASSIGN)
         return parseVarDeclaration();
 
     return parseExpressionStatement();
@@ -64,9 +61,9 @@ std::unique_ptr<ASTStmtNode> StmtParser::parseStatement() {
 
 std::unique_ptr<ASTStmtNode> StmtParser::parseVarDeclaration() {
     Token nameToken = peek();
-    advance(); // IDENTIFIER
+    advance();  // IDENTIFIER
 
-    advance(); // ASSIGN
+    advance();  // ASSIGN
 
     auto value = exprparser.parseExpr();
 
@@ -79,19 +76,19 @@ std::unique_ptr<ASTStmtNode> StmtParser::parseVarDeclaration() {
 }
 
 std::unique_ptr<ASTStmtNode> StmtParser::parsePrintStatement() {
-    advance(); // PRINT
+    advance();  // PRINT
 
     if (peek().type != TokenType::LPAREN)
         throw std::runtime_error("Expected '(' after print");
 
-    advance(); // (
+    advance();  // (
 
     auto expr = exprparser.parseExpr();
 
     if (peek().type != TokenType::RPAREN)
         throw std::runtime_error("Expected ')'");
 
-    advance(); // )
+    advance();  // )
 
     if (peek().type == TokenType::NEWLINE)
         advance();
@@ -109,24 +106,24 @@ std::unique_ptr<ASTStmtNode> StmtParser::parseExpressionStatement() {
 }
 
 std::unique_ptr<ASTStmtNode> StmtParser::parseIfStatement() {
-    advance(); // IF
+    advance();  // IF
 
     auto condition = exprparser.parseExpr();
 
     if (peek().type != TokenType::COLON)
         throw std::runtime_error("Expected ':' after if condition");
 
-    advance(); // :
+    advance();  // :
 
     if (peek().type != TokenType::NEWLINE)
         throw std::runtime_error("Expected newline");
 
-    advance(); // NEWLINE
+    advance();  // NEWLINE
 
     if (peek().type != TokenType::INDENT)
         throw std::runtime_error("Expected INDENT");
 
-    advance(); // INDENT
+    advance();  // INDENT
 
     auto block = std::make_unique<BlockNode>();
 
@@ -134,30 +131,30 @@ std::unique_ptr<ASTStmtNode> StmtParser::parseIfStatement() {
         block->statements.push_back(parseStatement());
     }
 
-    advance(); // DEDENT
+    advance();  // DEDENT
 
     return std::make_unique<IfStmtNode>(std::move(condition), std::move(block));
 }
 
 std::unique_ptr<ASTStmtNode> StmtParser::parseWhileStatement() {
-    advance(); // WHILE
+    advance();  // WHILE
 
     auto condition = exprparser.parseExpr();
 
     if (peek().type != TokenType::COLON)
         throw std::runtime_error("Expected ':'");
 
-    advance(); // :
+    advance();  // :
 
     if (peek().type != TokenType::NEWLINE)
         throw std::runtime_error("Expected newline");
 
-    advance(); // NEWLINE
+    advance();  // NEWLINE
 
     if (peek().type != TokenType::INDENT)
         throw std::runtime_error("Expected INDENT");
 
-    advance(); // INDENT
+    advance();  // INDENT
 
     auto block = std::make_unique<BlockNode>();
 
@@ -165,7 +162,7 @@ std::unique_ptr<ASTStmtNode> StmtParser::parseWhileStatement() {
         block->statements.push_back(parseStatement());
     }
 
-    advance(); // DEDENT
+    advance();  // DEDENT
 
     return std::make_unique<WhileStmtNode>(std::move(condition), std::move(block));
 }
