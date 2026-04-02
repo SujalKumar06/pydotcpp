@@ -46,15 +46,18 @@ std::unique_ptr<ProgramNode> StmtParser::parseProgram() {
 }
 
 std::unique_ptr<ASTStmtNode> StmtParser::parseStatement() {
-    if (peek().type == TokenType::PRINT) {
-        return parsePrintStatement();
-    } else if (peek().type == TokenType::IF) {
-        return parseIfStatement();
-    } else if (peek().type == TokenType::WHILE) {
-        return parseWhileStatement();
-    } else if (peek().type == TokenType::FOR) {
-        return parseForStatement();
-    } else if (peek().type == TokenType::IDENTIFIER && peekNext().type == TokenType::ASSIGN) {
+    // TODO: Implement print, if, while and for
+
+    // if (peek().type == TokenType::PRINT) {
+    //     return parsePrintStatement();
+    // } else if (peek().type == TokenType::IF) {
+    //     return parseIfStatement();
+    // } else if (peek().type == TokenType::WHILE) {
+    //     return parseWhileStatement();
+    // } else if (peek().type == TokenType::FOR) {
+    //     return parseForStatement();
+    // } else
+    if (peek().type == TokenType::IDENTIFIER && peekNext().type == TokenType::ASSIGN) {
         return parseVarDeclaration();
     } else {
         ignoreExpressionStatement();  // fallback
