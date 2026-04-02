@@ -23,3 +23,6 @@ jobs:
 
     - name: Lexer Tests
       run: make test-lexer
+
+    - name: Parser Tests
+      run: make test-parser
