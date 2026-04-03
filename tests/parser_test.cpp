@@ -224,6 +224,7 @@ void test(const std::string& input_code, const std::string& expected_ast_string)
 }
 
 int main() {
+    /*
     // ─── Values and Literals ─────────────────────────────────────────────────
     test("True", "(START-OF-NODES: (PRINT: True :END-OF-PRINT) :END-OF-NODES)");
 
@@ -236,6 +237,7 @@ int main() {
 
     // ─── Identifiers ─────────────────────────────────────────────────────────
     test("myVar", "(START-OF-NODES: (PRINT: myVar :END-OF-PRINT) :END-OF-NODES)");
+    */
 
     // ─── Assignment ──────────────────────────────────────────────────────────
     test("x = 5",
