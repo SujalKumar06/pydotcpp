@@ -53,10 +53,13 @@ std::unique_ptr<ASTStmtNode> StmtParser::parseStatement() {
     if (peek().type == TokenType::FOR)
         return parseForStatement();
 
-    if (peek().type == TokenType::IDENTIFIER && peekNext().type == TokenType::ASSIGN)
+    if (peek().type == TokenType::IDENTIFIER && peekNext().type == TokenType::ASSIGN){
         return parseVarDeclaration();
-
-    return parseExpressionStatement();
+    } else {
+        ignoreExpressionStatement();  // fallback
+        advance();
+        return nullptr;
+    }
 }
 
 std::unique_ptr<ASTStmtNode> StmtParser::parseVarDeclaration() {

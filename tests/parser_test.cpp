@@ -208,13 +208,17 @@ void test(const std::string& input_code, const std::string& expected_ast_string)
 
     try {
         std::unique_ptr<ProgramNode> ast = parser.parseProgram();
-        std::string obtained_ast_string  = convertStmtASTNodeToString(ast.get());
-        if (obtained_ast_string == expected_ast_string) {
-            test_runner.pass();
+        if (ast.get() != nullptr) {
+            std::string obtained_ast_string = convertStmtASTNodeToString(ast.get());
+            if (obtained_ast_string == expected_ast_string) {
+                test_runner.pass();
+            } else {
+                std::string failDetails = "  Expected: " + expected_ast_string + "\n" +
+                                          "  Got:      " + obtained_ast_string + "\n";
+                test_runner.fail("TEST PROVIDED WRONG OUTPUT: " + input_code, failDetails);
+            }
         } else {
-            std::string failDetails = "  Expected: " + expected_ast_string + "\n" +
-                                      "  Got:      " + obtained_ast_string + "\n";
-            test_runner.fail("TEST PROVIDED WRONG OUTPUT: " + input_code, failDetails);
+            test_runner.fail("PROGRAM NODE WAS NULL: " + input_code, "NO PROGRAM NODE WAS FOUND");
         }
     } catch (const std::exception& e) {
         test_runner.fail(
@@ -224,61 +228,179 @@ void test(const std::string& input_code, const std::string& expected_ast_string)
 }
 
 int main() {
-    /*
-    // ─── Values and Literals ─────────────────────────────────────────────────
-    test("True", "(START-OF-NODES: (PRINT: True :END-OF-PRINT) :END-OF-NODES)");
-
-    test("None", "(START-OF-NODES: (PRINT: None :END-OF-PRINT) :END-OF-NODES)");
-
-    test("42.5", "(START-OF-NODES: (PRINT: 42.5 :END-OF-PRINT) :END-OF-NODES)");
-
-    test(R"("hello world")",
-         "(START-OF-NODES: (PRINT: \"hello world\" :END-OF-PRINT) :END-OF-NODES)");
-
-    // ─── Identifiers ─────────────────────────────────────────────────────────
-    test("myVar", "(START-OF-NODES: (PRINT: myVar :END-OF-PRINT) :END-OF-NODES)");
-    */
-
-    // ─── Assignment ──────────────────────────────────────────────────────────
+    // ─── 1. Basic Variable Declarations & Literals ───────────────────────────
     test("x = 5",
          "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = 5 :END-OF-VAR-DECL) :END-OF-NODES)");
-
+    test("pi = 3.14",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = pi VAR_VALUE = 3.14 :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
     test("var123 = \"hello\"",
          "(START-OF-NODES: (VAR-DECL: VAR_NAME = var123 VAR_VALUE = \"hello\" :END-OF-VAR-DECL) "
          ":END-OF-NODES)");
+    test("flag = True",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = flag VAR_VALUE = True :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("flag = False",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = flag VAR_VALUE = False :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("empty = None",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = empty VAR_VALUE = None :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("a = b",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = a VAR_VALUE = b :END-OF-VAR-DECL) :END-OF-NODES)");
 
-    // ─── Expressions ─────────────────────────────────────────────────────────
-    test("x + y", "(START-OF-NODES: (PRINT: (+ x y) :END-OF-PRINT) :END-OF-NODES)");
+    // ─── 2. Binary Math Operations ───────────────────────────────────────────
+    test("x = 1 + 2",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (+ 1 2) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = 5 - 3",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (- 5 3) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = 4 * 2",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (* 4 2) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = 10 / 2",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (/ 10 2) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = 10 // 3",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (// 10 3) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = 10 % 3",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (% 10 3) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = 2 ** 3",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (** 2 3) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
 
-    test("a * b + c", "(START-OF-NODES: (PRINT: (+ (* a b) c) :END-OF-PRINT) :END-OF-NODES)");
+    // ─── 3. Unary Operations ─────────────────────────────────────────────────
+    test("x = -5",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (- 5) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = +10",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (+ 10) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = not True",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (not True) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = not a",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (not a) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
 
-    test("x ** 2", "(START-OF-NODES: (PRINT: (** x 2) :END-OF-PRINT) :END-OF-NODES)");
+    // ─── 4. Comparison & Logical Operations ──────────────────────────────────
+    test("x = a > b",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (> a b) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = a < b",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (< a b) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = a >= b",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (>= a b) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = a <= b",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (<= a b) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = a == b",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (== a b) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = a != b",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (!= a b) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = a and b",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (and a b) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = a or b",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (or a b) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
 
-    test("10 // 3", "(START-OF-NODES: (PRINT: (// 10 3) :END-OF-PRINT) :END-OF-NODES)");
+    // ─── 5. Complex Expressions & Precedence (PEMDAS) ────────────────────────
+    test("x = 1 + 2 * 3",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (+ 1 (* 2 3)) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = (1 + 2) * 3",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (* (+ 1 2) 3) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = a * b + c * d",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (+ (* a b) (* c d)) "
+         ":END-OF-VAR-DECL) :END-OF-NODES)");
+    test("x = a and b or c",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (or (and a b) c) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = a or b and c",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (or a (and b c)) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = not a and b",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (and (not a) b) :END-OF-VAR-DECL) "
+         ":END-OF-NODES)");
+    test("x = (a > b) and (c < d)",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = (and (> a b) (< c d)) "
+         ":END-OF-VAR-DECL) :END-OF-NODES)");
 
-    test("x % 2 == 0", "(START-OF-NODES: (PRINT: (== (% x 2) 0) :END-OF-PRINT) :END-OF-NODES)");
-
-    test("not x and y or z",
-         "(START-OF-NODES: (PRINT: (or (and (not x) y) z) :END-OF-PRINT) :END-OF-NODES)");
-
-    test("(x + y)", "(START-OF-NODES: (PRINT: (+ x y) :END-OF-PRINT) :END-OF-NODES)");
-
-    // ─── Print ───────────────────────────────────────────────────────────────
+    // ─── 6. Print Statements ─────────────────────────────────────────────────
     test("print(x)", "(START-OF-NODES: (PRINT: x :END-OF-PRINT) :END-OF-NODES)");
+    test("print(100)", "(START-OF-NODES: (PRINT: 100 :END-OF-PRINT) :END-OF-NODES)");
+    test("print(\"debug\")", "(START-OF-NODES: (PRINT: \"debug\" :END-OF-PRINT) :END-OF-NODES)");
+    test("print(a + b)", "(START-OF-NODES: (PRINT: (+ a b) :END-OF-PRINT) :END-OF-NODES)");
+    test("print(x == True)", "(START-OF-NODES: (PRINT: (== x True) :END-OF-PRINT) :END-OF-NODES)");
 
-    // ─── Control Flow (If / While) ───────────────────────────────────────────
-    test("if x > 0:\n    y = 1",
-         "(START-OF-NODES: (IF: CONDITION = (> x 0) BLOCK = (START-OF-BLOCK: (VAR-DECL: VAR_NAME = "
-         "y VAR_VALUE = 1 :END-OF-VAR-DECL) :END-OF-BLOCK) :END-OF-IF) :END-OF-NODES)");
+    // ─── 7. If Statements ────────────────────────────────────────────────────
+    test("if True:\n    x = 1",
+         "(START-OF-NODES: (IF: CONDITION = True BLOCK = (START-OF-BLOCK: (VAR-DECL: VAR_NAME = x "
+         "VAR_VALUE = 1 :END-OF-VAR-DECL) :END-OF-BLOCK) :END-OF-IF) :END-OF-NODES)");
+    test("if a > 0:\n    print(a)",
+         "(START-OF-NODES: (IF: CONDITION = (> a 0) BLOCK = (START-OF-BLOCK: (PRINT: a "
+         ":END-OF-PRINT) :END-OF-BLOCK) :END-OF-IF) :END-OF-NODES)");
+    test("if not x:\n    y = False",
+         "(START-OF-NODES: (IF: CONDITION = (not x) BLOCK = (START-OF-BLOCK: (VAR-DECL: VAR_NAME = "
+         "y VAR_VALUE = False :END-OF-VAR-DECL) :END-OF-BLOCK) :END-OF-IF) :END-OF-NODES)");
 
-    test("while True:\n    print(x)",
-         "(START-OF-NODES: (WHILE: CONDITION = True BLOCK = (START-OF-BLOCK: (PRINT: x "
+    // ─── 8. While Statements ─────────────────────────────────────────────────
+    test("while True:\n    print(1)",
+         "(START-OF-NODES: (WHILE: CONDITION = True BLOCK = (START-OF-BLOCK: (PRINT: 1 "
          ":END-OF-PRINT) :END-OF-BLOCK) :END-OF-WHILE) :END-OF-NODES)");
+    test("while x < 10:\n    x = x + 1",
+         "(START-OF-NODES: (WHILE: CONDITION = (< x 10) BLOCK = (START-OF-BLOCK: (VAR-DECL: "
+         "VAR_NAME = x VAR_VALUE = (+ x 1) :END-OF-VAR-DECL) :END-OF-BLOCK) :END-OF-WHILE) "
+         ":END-OF-NODES)");
+    test("while flag == False:\n    print(wait)",
+         "(START-OF-NODES: (WHILE: CONDITION = (== flag False) BLOCK = (START-OF-BLOCK: (PRINT: "
+         "wait :END-OF-PRINT) :END-OF-BLOCK) :END-OF-WHILE) :END-OF-NODES)");
 
-    // ─── Multi-line ──────────────────────────────────────────────────────────
+    // ─── 9. Multi-line Programs ──────────────────────────────────────────────
     test("x = 1\ny = 2",
          "(START-OF-NODES: (VAR-DECL: VAR_NAME = x VAR_VALUE = 1 :END-OF-VAR-DECL) (VAR-DECL: "
          "VAR_NAME = y VAR_VALUE = 2 :END-OF-VAR-DECL) :END-OF-NODES)");
+    test("a = 1\nb = a + 2\nprint(b)",
+         "(START-OF-NODES: (VAR-DECL: VAR_NAME = a VAR_VALUE = 1 :END-OF-VAR-DECL) (VAR-DECL: "
+         "VAR_NAME = b VAR_VALUE = (+ a 2) :END-OF-VAR-DECL) (PRINT: b :END-OF-PRINT) "
+         ":END-OF-NODES)");
+
+    // ─── 10. Multi-statement Blocks ──────────────────────────────────────────
+    test("if True:\n    x = 1\n    y = 2\n    print(x)",
+         "(START-OF-NODES: (IF: CONDITION = True BLOCK = (START-OF-BLOCK: (VAR-DECL: VAR_NAME = x "
+         "VAR_VALUE = 1 :END-OF-VAR-DECL) (VAR-DECL: VAR_NAME = y VAR_VALUE = 2 :END-OF-VAR-DECL) "
+         "(PRINT: x :END-OF-PRINT) :END-OF-BLOCK) :END-OF-IF) :END-OF-NODES)");
+
+    test("while active:\n    print(x)\n    active = False",
+         "(START-OF-NODES: (WHILE: CONDITION = active BLOCK = (START-OF-BLOCK: (PRINT: x "
+         ":END-OF-PRINT) (VAR-DECL: VAR_NAME = active VAR_VALUE = False :END-OF-VAR-DECL) "
+         ":END-OF-BLOCK) :END-OF-WHILE) :END-OF-NODES)");
+
+    // ─── 11. Nested Control Flow ─────────────────────────────────────────────
+    test("if a:\n    if b:\n        print(c)",
+         "(START-OF-NODES: (IF: CONDITION = a BLOCK = (START-OF-BLOCK: (IF: CONDITION = b BLOCK = "
+         "(START-OF-BLOCK: (PRINT: c :END-OF-PRINT) :END-OF-BLOCK) :END-OF-IF) :END-OF-BLOCK) "
+         ":END-OF-IF) :END-OF-NODES)");
+
+    test("while True:\n    if x == 0:\n        print(done)",
+         "(START-OF-NODES: (WHILE: CONDITION = True BLOCK = (START-OF-BLOCK: (IF: CONDITION = (== "
+         "x 0) BLOCK = (START-OF-BLOCK: (PRINT: done :END-OF-PRINT) :END-OF-BLOCK) :END-OF-IF) "
+         ":END-OF-BLOCK) :END-OF-WHILE) :END-OF-NODES)");
+
+    test("if out:\n    while in:\n        x = 1\n    print(out)",
+         "(START-OF-NODES: (IF: CONDITION = out BLOCK = (START-OF-BLOCK: (WHILE: CONDITION = in "
+         "BLOCK = (START-OF-BLOCK: (VAR-DECL: VAR_NAME = x VAR_VALUE = 1 :END-OF-VAR-DECL) "
+         ":END-OF-BLOCK) :END-OF-WHILE) (PRINT: out :END-OF-PRINT) :END-OF-BLOCK) :END-OF-IF) "
+         ":END-OF-NODES)");
 
     return test_runner.finish();
 }
