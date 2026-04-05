@@ -17,7 +17,7 @@ enum class OperatorType {
     //logical
     OR, // or
     AND, // and
-    NOT, // not
+    NOT, // not(unary)
 
     //comparisons
     GREATERTHAN, // >
