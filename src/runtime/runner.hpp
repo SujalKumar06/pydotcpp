@@ -22,4 +22,8 @@ private:
     Value evalBinary(const BinaryOperatorNode>& expr);
     Value evalUnary(const UnaryOperatorNode>& expr);
     Value evalPrimary(const ASTExprNode>& expr);
+
+    //value operation helpers
+    Value compareValues(const Value& lhs, const Value& rhs, OperatorType op);
+    Value arithmeticValues(const Value& lhs, const Value& rhs, OperatorType op);
 };

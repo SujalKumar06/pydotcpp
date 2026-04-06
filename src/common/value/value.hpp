@@ -11,6 +11,6 @@ using Value = std::variant<
 >;
 
 //helpers related to Value
-bool equals(const Value& lhs, const Value& rhs);
+bool isEquals(const Value& lhs, const Value& rhs);
 bool isTruthy(const Value& val);
 double toNumber(const Value& val);
