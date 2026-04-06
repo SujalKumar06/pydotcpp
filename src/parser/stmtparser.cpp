@@ -1,7 +1,7 @@
 #include "stmtparser.hpp"
 
 #include <vector>
-
+#include <stdexcept>
 #include "token.hpp"
 
 StmtParser::StmtParser(std::vector<Token> tokens)
