@@ -11,9 +11,9 @@ void Runner::runStmt(const ASTStmtNode& stmt) {}
 Value Runner::evalExpr(const ASTExprNode& expr) {
     switch (expr.type) {
         case ASTExprNodeType::BINARY:
-            return evalBinary(std::static_cast<const BinaryOperatorNode&>(expr));
+            return evalBinary(static_cast<const BinaryOperatorNode&>(expr));
         case ASTExprNodeType::UNARY:
-            return evalUnary(std::static_cast<const UnaryOperatorNode&>(expr));
+            return evalUnary(static_cast<const UnaryOperatorNode&>(expr));
 
         case ASTExprNodeType::STRING:
         case ASTExprNodeType::NUMBER:
@@ -93,14 +93,14 @@ Value Runner::evalUnary(const UnaryOperatorNode& expr) {
 Value Runner::evalPrimary(const ASTExprNode& expr) {
     switch (expr.type) {
         case ASTExprNodeType::STRING:
-            return Value(std::static_cast<const StringNode&>(expr).value);
+            return Value(static_cast<const StringNode&>(expr).value);
         case ASTExprNodeType::NUMBER:
-            return Value(std::static_cast<const NumberNode&>(expr).value);
+            return Value(static_cast<const NumberNode&>(expr).value);
         case ASTExprNodeType::BOOLEAN:
-            return Value(std::static_cast<const BooleanNode&>(expr).value);
+            return Value(static_cast<const BooleanNode&>(expr).value);
 
         case ASTExprNodeType::REFERENCE: {
-            std::string name = std::static_cast<const ReferenceNode&>(expr).name;
+            std::string name = static_cast<const ReferenceNode&>(expr).name;
             auto it          = env.find(name);
 
             if (it != env.end())
@@ -117,7 +117,7 @@ Value Runner::evalPrimary(const ASTExprNode& expr) {
     }
 }
 
-Value compareValues(const Value& lhs, const Value& rhs, OperatorType op) {
+Value Runner::compareValues(const Value& lhs, const Value& rhs, OperatorType op) {
     double lhs_num = toNumber(lhs, "comparison between incompatible types");
     double rhs_num = toNumber(rhs, "comparison between incompatible types");
 
@@ -127,7 +127,7 @@ Value compareValues(const Value& lhs, const Value& rhs, OperatorType op) {
         case OperatorType::GREATEREQUAL:
             return Value(lhs_num >= rhs_num);
         case OperatorType::LESSEQUAL:
-            return Value(lhs_num <= lhs_num);
+            return Value(lhs_num <= rhs_num);
         case OperatorType::LESSERTHAN:
             return Value(lhs_num < rhs_num);
 
@@ -136,49 +136,60 @@ Value compareValues(const Value& lhs, const Value& rhs, OperatorType op) {
     }
 }
 
-Value arithmeticValues(const Value& lhs, const Value& rhs, OperatorType op) {
+Value Runner::arithmeticValues(const Value& lhs, const Value& rhs, OperatorType op) {
     switch (op) {
-        case OperatorType::PLUS:
-            return std::visit(
-                [&lhs, &rhs](auto&& lval, auto&& rval) {
-                    using ltype = std::decay_t<decltype(lval)>;
-                    using rtype = std::decay_t<decltype(rval)>;
+        case OperatorType::PLUS: {
+            // string+string
+            if (std::holds_alternative<std::string>(lhs) &&
+                std::holds_alternative<std::string>(rhs)) {
+                return Value(std::get<std::string>(lhs) + std::get<std::string>(rhs));
+            }
 
-                    if constexpr (std::is_same_v(ltype, std::string) &&
-                                  std::is_same_v(rtype, std::string))
-                        return Value(lval + rval);
-                    else {
-                        double lnum = toNumber(lhs, "addition between incompatible types");
-                        double rnum = toNumber(rhs, "addition between incompatible types");
-                        return Value(lnum + rnum);
-                    }
-                },
-                lhs, rhs);
+            double lnum = toNumber(lhs, "addition between incompatible types");
+            double rnum = toNumber(rhs, "addition between incompatible types");
+            return Value(lnum + rnum);
+        }
 
-        case OperatorType::STAR:
-            return std::visit(
-                [](auto&& lval, auto&& rval) {
-                    using ltype = std::decay_t<decltype(lval)>;
-                    using rtype = std::decay_t<decltype(rval)>;
+        case OperatorType::STAR: {
+            // string*num
+            if (std::holds_alternative<std::string>(lhs)) {
+                double num     = toNumber(rhs, "multiplication between incompatible types");
+                double rounded = std::round(num);
+                // arbitrary epsilon for considering a double as an integer
+                if (std::abs(num - rounded) > 1e-9 || rounded < 0)
+                    throw std::runtime_error(
+                        "strings can only be multiplied by non-negative integral values");
 
-                    double rnum = toNumber(rhs, "multiplication between incompatible types");
+                std::string str = std::get<std::string>(lhs);
+                std::string output;
+                long long count = std::llround(num);
+                for (long long i = 0; i < count; i++)
+                    output += str;
+                return Value(output);
+            }
 
-                    if constexpr (std::is_same_v(ltype, std::string)) {
-                        // arbitrary epsilon for considering a double as an integer
-                        if (std::abs(rnum - std::round(rnum)) > 1e-9 || std::round(rnum) < 0)
-                            throw std::runtime_error(
-                                "strings can only be multiplied by non-negative integral values");
+            // num*string
+            if (std::holds_alternative<std::string>(rhs)) {
+                double num = toNumber(lhs, "multiplication between incompatible types");
 
-                        std::string output;
-                        while (double i = std::round(rnum); i > 0; i--)
-                            output += lval;
-                        return Value(output);
-                    } else {
-                        double lnum = toNumber(lhs, "addition between incompatible types");
-                        return Value(lnum * rnum);
-                    }
-                },
-                lhs, rhs);
+                double rounded = std::round(num);
+                // arbitrary epsilon for considering a double as an integer
+                if (std::abs(num - rounded) > 1e-9 || rounded < 0)
+                    throw std::runtime_error(
+                        "strings can only be multiplied by non-negative integral values");
+
+                std::string str = std::get<std::string>(rhs);
+                std::string output;
+                long long count = std::llround(num);
+                for (long long i = 0; i < count; i++)
+                    output += str;
+                return Value(output);
+            }
+
+            double rnum = toNumber(rhs, "multiplication between incompatible types");
+            double lnum = toNumber(lhs, "multiplication between incompatible types");
+            return Value(lnum * rnum);
+        }
 
         case OperatorType::MINUS: {
             double lnum = toNumber(lhs, "subtraction between incompatible types");

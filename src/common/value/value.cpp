@@ -53,7 +53,7 @@ bool isTruthy(const Value& val) {
 }
 
 // helper function to deal with boolean-double operations
-double toNumber(const Value& val, std::string err = "cannot perform number conversion") {
+double toNumber(const Value& val, std::string err) {
     return std::visit(
         [&err](auto&& val) -> double {
             using T = std::decay_t<decltype(val)>;

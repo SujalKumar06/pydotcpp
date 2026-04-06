@@ -12,16 +12,16 @@ class Runner {
 public:
     Runner();
     void runStmt(const ASTStmtNode& stmt);
-    Value evalExpr(const ASTExprNode>& expr);
+    Value evalExpr(const ASTExprNode& expr);
 
 private:
     //the global variable environment
     std::unordered_map<std::string, Value> env;
 
     //expr eval helpers
-    Value evalBinary(const BinaryOperatorNode>& expr);
-    Value evalUnary(const UnaryOperatorNode>& expr);
-    Value evalPrimary(const ASTExprNode>& expr);
+    Value evalBinary(const BinaryOperatorNode& expr);
+    Value evalUnary(const UnaryOperatorNode& expr);
+    Value evalPrimary(const ASTExprNode& expr);
 
     //value operation helpers
     Value compareValues(const Value& lhs, const Value& rhs, OperatorType op);
