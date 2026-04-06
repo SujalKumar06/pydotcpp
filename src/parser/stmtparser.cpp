@@ -61,7 +61,8 @@ std::unique_ptr<ASTStmtNode> StmtParser::parseStatement() {
         return parseVarDeclaration();
     } else {
         ignoreExpressionStatement();  // fallback
-        return parseStatement();
+        advance();
+        return nullptr;
     }
 }
 
