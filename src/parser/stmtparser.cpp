@@ -29,6 +29,70 @@ void StmtParser::advance() {
     }
 }
 
+std::unique_ptr<ASTStmtNode> StmtParser::parseBlock() {
+    auto block = std::make_unique<BlockNode>();
+    if (peek().type != TokenType::INDENT) {  // A block must start with an INDENT
+        throw std::runtime_error("Expected indentation block");
+    }
+    advance();
+    // Keep parsing statements until we hit a DEDENT or EOF
+    while (peek().type != TokenType::DEDENT && peek().type != TokenType::EOF_TOKEN) {
+        // Skip empty newlines
+        if (peek().type == TokenType::NEWLINE) {
+            advance();
+            continue;
+        }
+        auto stmt = parseStatement();
+        if (stmt) {  // Check that there is code - stmt is not a nullptr
+            block->statements.push_back(
+                std::move(stmt));  // Store all statements as a vector in the block
+        }
+    }
+    // A block must close with a DEDENT
+    if (peek().type == TokenType::DEDENT) {
+        advance();
+    }
+    return block;
+}
+
+std::unique_ptr<ASTStmtNode> StmtParser::parseIfStatement() {
+    advance();  // Consume the 'if' (or 'elif') token
+    // Parse the condition using ExprParser
+    auto condition = exprparser.parseExpr();
+    //  Consume the required ':' and NEWLINE
+    if (peek().type != TokenType::COLON) {
+        throw std::runtime_error("Expected ':' after condition");
+    }
+    advance();  // Consume ':'
+    if (peek().type == TokenType::NEWLINE) {
+        advance();  // Consume NEWLINE before the block
+    }
+    // Parse the indented block
+    auto block = parseBlock();
+    // Create the IfNode (we will handle elif/else below)
+    auto ifNode = std::make_unique<IfStmtNode>(std::move(condition), std::move(block));
+    // Check for 'elif'
+    if (peek().type == TokenType::ELIF) {
+        // Recursively call parseIfStatement.
+        ifNode->elif_ptr = parseIfStatement();  // Can use same logic as done for if
+    }
+    // Check for 'else'
+    else if (peek().type == TokenType::ELSE) {
+        advance();  // Consume 'else'
+        if (peek().type != TokenType::COLON) {
+            throw std::runtime_error("Expected ':' after else");
+        }
+        advance();  // Consume ':'
+        if (peek().type == TokenType::NEWLINE) {
+            advance();  // Consume NEWLINE
+        }
+        // Parse the else block and wrap it in an ElseStmtNode
+        auto elseBlock   = parseBlock();
+        ifNode->else_ptr = std::make_unique<ElseStmtNode>(std::move(elseBlock));
+    }
+    return ifNode;
+}
+
 std::unique_ptr<ProgramNode> StmtParser::parseProgram() {
     auto program = std::make_unique<ProgramNode>();
 
@@ -50,15 +114,15 @@ std::unique_ptr<ASTStmtNode> StmtParser::parseStatement() {
 
     // if (peek().type == TokenType::PRINT) {
     //     return parsePrintStatement();
-    // } else if (peek().type == TokenType::IF) {
-    //     return parseIfStatement();
-    // } else if (peek().type == TokenType::WHILE) {
-    //     return parseWhileStatement();
     // } else if (peek().type == TokenType::FOR) {
     //     return parseForStatement();
     // } else
     if (peek().type == TokenType::IDENTIFIER && peekNext().type == TokenType::ASSIGN) {
         return parseVarDeclaration();
+    } else if (peek().type == TokenType::IF) {
+        return parseIfStatement();
+        // else if (peek().type == TokenType::WHILE) {
+        //     return parseWhileStatement();
     } else {
         ignoreExpressionStatement();  // fallback
         advance();
