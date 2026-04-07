@@ -6,7 +6,29 @@
 
 Runner::Runner() {}
 
-void Runner::runStmt(const ASTStmtNode& stmt) {}
+void Runner::runStmt(const ASTStmtNode& stmt) {
+    switch (stmt.type) {
+        case ASTStmtNodeType::PROGRAM: {
+            for (const auto& statementptr : static_cast<const ProgramNode&>(stmt).statements)
+                runStmt(*statementptr);
+        }
+
+        case ASTStmtNodeType::BLOCK: {
+            for (const auto& statementptr : static_cast<const BlockNode&>(stmt).statements)
+                runStmt(*statementptr);
+        }
+
+        case ASTStmtNodeType::VAR_DECL: {
+            const VarDeclNode& vardecl = static_cast<const VarDeclNode&>(stmt);
+            std::string name           = static_cast<const ReferenceNode&>(*vardecl.name).name;
+            Value rhs                  = evalExpr(*vardecl.value);
+            env[name]                  = rhs;
+        }
+
+        default:
+            throw std::runtime_error("unexpected stmt node type");
+    }
+}
 
 Value Runner::evalExpr(const ASTExprNode& expr) {
     switch (expr.type) {
