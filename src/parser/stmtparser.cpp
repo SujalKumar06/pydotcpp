@@ -5,14 +5,16 @@
 
 #include "token.hpp"
 
-        StmtParser::StmtParser(std::vector<Token> tokens)
-    : tokens(std::move(tokens)),
-exprparser(this->tokens, index) {
-}
+StmtParser::StmtParser(std::vector<Token> tokens)
+    : tokens(std::move(tokens)), exprparser(this->tokens, index) {}
 
 Token StmtParser::peek() {
     if (index < tokens.size()) {
+    if (index < tokens.size()) {
         return tokens[index];
+    } else {
+        return tokens.back();  // EOF Token
+    }
     } else {
         return tokens.back();  // EOF Token
     }
@@ -20,7 +22,11 @@ Token StmtParser::peek() {
 
 Token StmtParser::peekNext() {
     if (index + 1 < tokens.size()) {
+    if (index + 1 < tokens.size()) {
         return tokens[index + 1];
+    } else {
+        return tokens.back();  // EOF Token
+    }
     } else {
         return tokens.back();  // EOF Token
     }
@@ -28,7 +34,9 @@ Token StmtParser::peekNext() {
 
 void StmtParser::advance() {
     if (index < tokens.size()) {
+    if (index < tokens.size()) {
         index++;
+    }
     }
 }
 
@@ -118,6 +126,7 @@ std::unique_ptr<ProgramNode> StmtParser::parseProgram() {
 
     while (peek().type != TokenType::EOF_TOKEN) {
         // skip empty lines
+        // skip empty lines
         if (peek().type == TokenType::NEWLINE) {
             advance();
             continue;
@@ -130,6 +139,7 @@ std::unique_ptr<ProgramNode> StmtParser::parseProgram() {
 }
 
 std::unique_ptr<ASTStmtNode> StmtParser::parseStatement() {
+    // TODO: Implement print, if, while and for
     // TODO: Implement print, if, while and for
 
     if (peek().type == TokenType::PRINT) {
@@ -167,7 +177,10 @@ std::unique_ptr<ASTStmtNode> StmtParser::parseVarDeclaration() {
     Token nameToken = peek();
     advance();  // variable name
     advance();  // =
+    advance();  // variable name
+    advance();  // =
 
+    auto value = exprparser.parseExpr();  // RHS
     auto value = exprparser.parseExpr();  // RHS
 
     if (peek().type == TokenType::NEWLINE)
@@ -176,7 +189,17 @@ std::unique_ptr<ASTStmtNode> StmtParser::parseVarDeclaration() {
     auto nameNode = std::make_unique<ReferenceNode>(nameToken.value);
 
     // return the node
+    // return the node
     return std::make_unique<VarDeclNode>(std::move(nameNode), std::move(value));
+}
+
+std::unique_ptr<ASTStmtNode> StmtParser::parsePrintStatement() {
+    advance();
+    auto expr = exprparser.parseExpr();
+    if (peek().type == TokenType::NEWLINE) {
+        advance();
+    }
+    return std::make_unique<PrintStmtNode>(std::move(expr));
 }
 
 // TODO: Think if just ignoring an expression statement is ok,
