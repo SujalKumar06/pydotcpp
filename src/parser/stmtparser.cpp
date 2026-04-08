@@ -5,8 +5,10 @@
 
 #include "token.hpp"
 
-StmtParser::StmtParser(std::vector<Token> tokens)
-    : tokens(std::move(tokens)), exprparser(this->tokens, index) {}
+        StmtParser::StmtParser(std::vector<Token> tokens)
+    : tokens(std::move(tokens)),
+exprparser(this->tokens, index) {
+}
 
 Token StmtParser::peek() {
     if (index < tokens.size()) {
