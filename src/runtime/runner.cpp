@@ -1,21 +1,36 @@
 #include "runner.hpp"
 
 #include <cmath>
+#include <iostream>
 #include <stdexcept>
 #include <type_traits>
 
 Runner::Runner() {}
 
-void Runner::runStmt(const ASTStmtNode& stmt) {
+ReturnType Runner::runStmt(const ASTStmtNode& stmt) {
     switch (stmt.type) {
         case ASTStmtNodeType::PROGRAM: {
-            for (const auto& statementptr : static_cast<const ProgramNode&>(stmt).statements)
-                runStmt(*statementptr);
+            for (const auto& statementptr : static_cast<const ProgramNode&>(stmt).statements) {
+                ReturnType ret = runStmt(*statementptr);
+
+                if (ret == ReturnType::BREAK)
+                    throw std::runtime_error("break outside loop");
+                else if (ret == ReturnType::CONTINUE)
+                    throw std::runtime_error("continue outside loop");
+            }
+
+            return ReturnType::NORMAL;
         }
 
         case ASTStmtNodeType::BLOCK: {
-            for (const auto& statementptr : static_cast<const BlockNode&>(stmt).statements)
-                runStmt(*statementptr);
+            for (const auto& statementptr : static_cast<const BlockNode&>(stmt).statements) {
+                ReturnType ret = runStmt(*statementptr);
+
+                if (ret != ReturnType::NORMAL)
+                    return ret;
+            }
+
+            return ReturnType::NORMAL;
         }
 
         case ASTStmtNodeType::VAR_DECL: {
@@ -23,6 +38,53 @@ void Runner::runStmt(const ASTStmtNode& stmt) {
             std::string name           = static_cast<const ReferenceNode&>(*vardecl.name).name;
             Value rhs                  = evalExpr(*vardecl.value);
             env[name]                  = rhs;
+            return ReturnType::NORMAL;
+        }
+
+        case ASTStmtNodeType::PRINT_STMT: {
+            Value val = evalExpr(*static_cast<const PrintStmtNode&>(stmt).expr);
+
+            std::visit(
+                [](auto&& v) -> void {
+                    using T = std::decay_t<decltype(v)>;
+
+                    if constexpr (std::is_same_v<T, std::monostate>)
+                        std::cout << "None" << '\n';
+                    else if constexpr (std::is_same_v<T, bool>)
+                        std::cout << (v ? "True" : "False") << '\n';
+                    else
+                        std::cout << v << '\n';
+                },
+                val);
+
+            return ReturnType::NORMAL;
+        }
+
+        case ASTStmtNodeType::WHILE_STMT: {
+            const WhileStmtNode& whilestmt = static_cast<const WhileStmtNode&>(stmt);
+            while (isTruthy(evalExpr(*whilestmt.condition))) {
+                ReturnType ret = runStmt(*whilestmt.block);
+
+                if (ret == ReturnType::BREAK)
+                    break;
+                else if (ret == ReturnType::CONTINUE)
+                    continue;
+            }
+
+            return ReturnType::NORMAL;
+        }
+
+        case ASTStmtNodeType::IF_STMT: {
+            const IfStmtNode& ifstmt = static_cast<const IfStmtNode&>(stmt);
+
+            if (isTruthy(evalExpr(*ifstmt.condition)))
+                return runStmt(*ifstmt.block);
+            else if (ifstmt.elif_ptr)
+                return runStmt(*ifstmt.elif_ptr);
+            else if (ifstmt.else_ptr)
+                return runStmt(*ifstmt.else_ptr);
+            else
+                return ReturnType::NORMAL;
         }
 
         default:

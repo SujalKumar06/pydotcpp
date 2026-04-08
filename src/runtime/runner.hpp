@@ -8,10 +8,16 @@
 #include <unordered_map>
 #include <string>
 
+enum class ReturnType {
+    NORMAL,
+    BREAK,
+    CONTINUE,
+};
+
 class Runner {
 public:
     Runner();
-    void runStmt(const ASTStmtNode& stmt);
+    ReturnType runStmt(const ASTStmtNode& stmt);
     Value evalExpr(const ASTExprNode& expr);
 
 private:
