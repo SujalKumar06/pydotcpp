@@ -44,6 +44,7 @@ ReturnType Runner::runStmt(const ASTStmtNode& stmt) {
         case ASTStmtNodeType::PRINT_STMT: {
             Value val = evalExpr(*static_cast<const PrintStmtNode&>(stmt).expr);
 
+            // printing to stdout
             std::visit(
                 [](auto&& v) -> void {
                     using T = std::decay_t<decltype(v)>;

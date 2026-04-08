@@ -3,6 +3,7 @@
 #include <variant>
 #include <string>
 
+//runtime value representation
 using Value = std::variant<
     double,
     std::string,
