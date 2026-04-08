@@ -40,3 +40,7 @@ ForStmtNode::ForStmtNode(std::unique_ptr<ASTExprNode> condition, std::unique_ptr
 BlockNode::BlockNode() : ASTStmtNode(ASTStmtNodeType::BLOCK) {}
 
 ProgramNode::ProgramNode() : ASTStmtNode(ASTStmtNodeType::PROGRAM) {}
+
+BreakStmtNode::BreakStmtNode() : ASTStmtNode(ASTStmtNodeType::BREAK_STMT) {}
+
+ContinueStmtNode::ContinueStmtNode() : ASTStmtNode(ASTStmtNodeType::CONTINUE_STMT) {}
