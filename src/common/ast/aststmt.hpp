@@ -14,8 +14,10 @@ enum class ASTStmtNodeType {
     WHILE_STMT, //while block. Points to condition and BLOCK
     FOR_STMT, //for block. Points to condition for looping and BLOCK
     BLOCK,  //reference to a vector of ASTNodes that are in a block
-    PROGRAM //root node
-};
+    PROGRAM, //root node
+    BREAK_STMT, // break
+    CONTINUE_STMT, // continue
+    };
 
 //abstract ASTStmtNode class
 class ASTStmtNode {
@@ -97,4 +99,14 @@ public:
     ProgramNode();
 
     std::vector<std::unique_ptr<ASTStmtNode>> statements;
+};
+
+class BreakStmtNode : public ASTStmtNode{
+    public:
+    BreakStmtNode();
+};
+
+class ContinueStmtNode : public ASTStmtNode{
+    public:
+    ContinueStmtNode();
 };

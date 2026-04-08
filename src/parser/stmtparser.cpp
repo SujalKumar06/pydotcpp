@@ -1,7 +1,8 @@
 #include "stmtparser.hpp"
 
-#include <vector>
 #include <stdexcept>
+#include <vector>
+
 #include "token.hpp"
 
 StmtParser::StmtParser(std::vector<Token> tokens)
@@ -93,6 +94,23 @@ std::unique_ptr<ASTStmtNode> StmtParser::parseIfStatement() {
     return ifNode;
 }
 
+std::unique_ptr<ASTStmtNode> StmtParser::parseWhileStatement() {
+    advance();
+    auto condition = exprparser.parseExpr();
+    if (peek().type != TokenType::COLON) {
+        throw std::runtime_error("Expected ':' after condition");
+    }
+    advance();
+    if (peek().type == TokenType::NEWLINE) {
+        advance();
+    }
+    auto block = parseBlock();
+
+    auto whileNode = std::make_unique<WhileStmtNode>(std::move(condition), std::move(block));
+
+    return whileNode;
+}
+
 std::unique_ptr<ProgramNode> StmtParser::parseProgram() {
     auto program = std::make_unique<ProgramNode>();
 
@@ -112,17 +130,30 @@ std::unique_ptr<ProgramNode> StmtParser::parseProgram() {
 std::unique_ptr<ASTStmtNode> StmtParser::parseStatement() {
     // TODO: Implement print, if, while and for
 
-    // if (peek().type == TokenType::PRINT) {
-    //     return parsePrintStatement();
+    if (peek().type == TokenType::PRINT) {
+        return parsePrintStatement();
+    }
     // } else if (peek().type == TokenType::FOR) {
     //     return parseForStatement();
     // } else
-    if (peek().type == TokenType::IDENTIFIER && peekNext().type == TokenType::ASSIGN) {
+    else if (peek().type == TokenType::IDENTIFIER && peekNext().type == TokenType::ASSIGN) {
         return parseVarDeclaration();
     } else if (peek().type == TokenType::IF) {
         return parseIfStatement();
-        // else if (peek().type == TokenType::WHILE) {
-        //     return parseWhileStatement();
+    } else if (peek().type == TokenType::WHILE) {
+        return parseWhileStatement();
+    } else if (peek().type == TokenType::BREAK) {
+        advance();
+        if (peek().type == TokenType::NEWLINE) {
+            advance();
+        }
+        return std::make_unique<BreakStmtNode>();
+    } else if (peek().type == TokenType::CONTINUE) {
+        advance();
+        if (peek().type == TokenType::NEWLINE) {
+            advance();
+        }
+        return std::make_unique<ContinueStmtNode>();
     } else {
         ignoreExpressionStatement();  // fallback
         advance();
