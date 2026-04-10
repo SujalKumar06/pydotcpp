@@ -79,7 +79,6 @@ void Lexer::scanNumber(std::string num) {
 
     if (num == "0" && std::isdigit(peek())) {
         throw std::runtime_error("leading zeros are not allowed");
-        
     }
 
     while (std::isdigit(peek())) {
@@ -167,15 +166,15 @@ std::vector<Token> Lexer::scan_Tokens() {
             Token token(TokenType::EOF_TOKEN, "", line, column);
             tokens.push_back(token);
             break;
-        }  
+        }
         std::string curr = "";
         curr += advance();
 
         if (curr == " " || curr == "\t") {
-            continue;  
-        } 
+            continue;
+        }
 
-        // handle two-character operators   
+        // handle two-character operators
         if (curr == "=" && peek() == '=') {
             advance();
             Token token(TokenType::EQEQUAL, "==", line,
