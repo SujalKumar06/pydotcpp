@@ -1,9 +1,9 @@
 #include <cmath>  // for exponentiation in scientific notation
 #include <keywords.hpp>
 #include <lexer.hpp>
+#include <stdexcept>
 #include <string>
 #include <token.hpp>
-#include <stdexcept>
 
 Lexer::Lexer(std::string input_string) : source_code(input_string) {
     indent_stack.push(0);  // stack initially must have 0
