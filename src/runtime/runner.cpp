@@ -93,6 +93,12 @@ ReturnType Runner::runStmt(const ASTStmtNode& stmt) {
         case ASTStmtNodeType::ELSE_STMT:
             return runStmt(*static_cast<const ElseStmtNode&>(stmt).block);
 
+        case ASTStmtNodeType::CONTINUE_STMT:
+            return ReturnType::CONTINUE;
+
+        case ASTStmtNodeType::BREAK_STMT:
+            return ReturnType::BREAK;
+
         default:
             throw std::runtime_error("unexpected stmt node type");
     }
