@@ -435,5 +435,5 @@ void Runner::prettyPrint(const std::string& str) {
         }
     }
 
-    cout << result << '\n';
+    std::cout << result << '\n';
 }
