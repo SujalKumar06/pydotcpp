@@ -46,13 +46,17 @@ ReturnType Runner::runStmt(const ASTStmtNode& stmt) {
 
             // printing to stdout
             std::visit(
-                [](auto&& v) -> void {
+                [this](auto&& v) -> void {
                     using T = std::decay_t<decltype(v)>;
 
                     if constexpr (std::is_same_v<T, std::monostate>)
                         std::cout << "None" << '\n';
                     else if constexpr (std::is_same_v<T, bool>)
                         std::cout << (v ? "True" : "False") << '\n';
+                    else if constexpr (std::is_same_v<T, std::string>) {
+                        prettyPrint(v);
+                        std::cout << '\n';
+                    }
                     else
                         std::cout << v << '\n';
                 },
@@ -385,5 +389,30 @@ Value Runner::arithmeticValues(const Value& lhs, const Value& rhs, OperatorType 
 
         default:
             throw std::runtime_error("unexpected arithmetic operator type");
+    }
+}
+
+void Runner::prettyPrint(const std::string& str) {
+    for (size_t i = 0; i < str.size(); i++) {
+        if (str[i] == '\\' && i + 1 < str.size()) {
+            //handle escape sequences
+            switch (str[i + 1]) {
+                case 'n': std::cout << '\n'; break;
+                case 't': std::cout << '\t'; break;
+                case 'r': std::cout << '\r'; break;
+                case '\\': std::cout << '\\'; break;
+                case '"': std::cout << '"'; break;
+                case '\'': std::cout << '\''; break;
+                case 'b': std::cout << '\b'; break;
+                case 'f': std::cout << '\f'; break;
+                default:
+                    //unknown escape, so just print
+                    std::cout << '\\' << str[i + 1];
+                    break;
+            }
+            i++; //skip next character
+        } else {
+            std::cout << str[i];
+        }
     }
 }
