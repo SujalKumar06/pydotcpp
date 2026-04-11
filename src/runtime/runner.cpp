@@ -53,10 +53,9 @@ ReturnType Runner::runStmt(const ASTStmtNode& stmt) {
                         std::cout << "None" << '\n';
                     else if constexpr (std::is_same_v<T, bool>)
                         std::cout << (v ? "True" : "False") << '\n';
-                    else if constexpr (std::is_same_v<T, std::string>) {
+                    else if constexpr (std::is_same_v<T, std::string>)
                         prettyPrint(v);
-                        std::cout << '\n';
-                    } else
+                    else
                         std::cout << v << '\n';
                 },
                 val);
@@ -395,42 +394,46 @@ Value Runner::arithmeticValues(const Value& lhs, const Value& rhs, OperatorType 
 }
 
 void Runner::prettyPrint(const std::string& str) {
+    std::string result;
+
     for (size_t i = 0; i < str.size(); i++) {
         if (str[i] == '\\' && i + 1 < str.size()) {
             // handle escape sequences
             switch (str[i + 1]) {
                 case 'n':
-                    std::cout << '\n';
+                    result += '\n';
                     break;
                 case 't':
-                    std::cout << '\t';
+                    result += '\t';
                     break;
                 case 'r':
-                    std::cout << '\r';
+                    result += '\r';
                     break;
                 case '\\':
-                    std::cout << '\\';
+                    result += '\\';
                     break;
                 case '"':
-                    std::cout << '"';
+                    result += '"';
                     break;
                 case '\'':
-                    std::cout << '\'';
+                    result += '\'';
                     break;
                 case 'b':
-                    std::cout << '\b';
+                    result += '\b';
                     break;
                 case 'f':
-                    std::cout << '\f';
+                    result += '\f';
                     break;
                 default:
                     // unknown escape, so just print
-                    std::cout << '\\' << str[i + 1];
+                    result += '\\' + str[i + 1];
                     break;
             }
             i++;  // skip next character
         } else {
-            std::cout << str[i];
+            result += str[i];
         }
     }
+
+    cout << result << '\n';
 }
