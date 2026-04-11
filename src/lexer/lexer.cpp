@@ -86,7 +86,7 @@ void Lexer::scanNumber(std::string num) {
         num += Lexer::advance();
     }
     if (peek() == '.' && num[0] == '.') {
-        throw std::runtime_error("we can have .23 and 23.23, but .23.23 is error");
+        throw std::runtime_error("invalid floating point number");
     }
     if (peek() == '.' && std::isdigit(peekNext())) {  // for floating point numbers
         num += advance();
