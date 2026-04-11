@@ -16,7 +16,7 @@ enum class ASTStmtNodeType {
     PROGRAM, //root node
     BREAK_STMT, // break
     CONTINUE_STMT, // continue
-    };
+};
 
 //abstract ASTStmtNode class
 class ASTStmtNode {
