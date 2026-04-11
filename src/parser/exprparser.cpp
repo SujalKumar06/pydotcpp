@@ -216,8 +216,11 @@ std::unique_ptr<ASTExprNode> ExprParser::parsePrimary() {
                 }
             }
         }
-        case TokenType::STRING:
-            return std::make_unique<StringNode>(std::move(token.value));
+        case TokenType::STRING: {
+            //removing starting and ending quotes
+            std::string val = token.value.substr(1, token.value.size() - 2);
+            return std::make_unique<StringNode>(std::move(val));
+        }
         case TokenType::TRUE:
             return std::make_unique<BooleanNode>(true);
         case TokenType::FALSE:

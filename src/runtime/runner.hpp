@@ -33,4 +33,7 @@ private:
     //value operation helpers
     Value compareValues(const Value& lhs, const Value& rhs, OperatorType op);
     Value arithmeticValues(const Value& lhs, const Value& rhs, OperatorType op);
+
+    //stmt eval helpers
+    void prettyPrint(const std::string& str);
 };
