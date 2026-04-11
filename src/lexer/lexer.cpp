@@ -1,6 +1,7 @@
 #include <cmath>  // for exponentiation in scientific notation
 #include <keywords.hpp>
 #include <lexer.hpp>
+#include <stdexcept>
 #include <string>
 #include <token.hpp>
 
@@ -69,7 +70,7 @@ void Lexer::processIndent() {  // maintains an indent stack and adds indent and 
             tokens.push_back(token);
         }
         if (indent_stack.empty()) {
-            // TODO: throw an error - invalid indentation
+            throw std::runtime_error("invalid indentation");
         }
     }
 }
@@ -78,14 +79,14 @@ void Lexer::scanNumber(std::string num) {
     int start = column - 1;  // column of the number token
 
     if (num == "0" && std::isdigit(peek())) {
-        // TODO: throw an error, leading zero
+        throw std::runtime_error("leading zeros are not allowed");
     }
 
     while (std::isdigit(peek())) {
         num += Lexer::advance();
     }
     if (peek() == '.' && num[0] == '.') {
-        // TODO: throw an error - we can have .23 and 23.23, but .23.23 is error
+        throw std::runtime_error("invalid floating point number");
     }
     if (peek() == '.' && std::isdigit(peekNext())) {  // for floating point numbers
         num += advance();
@@ -97,12 +98,12 @@ void Lexer::scanNumber(std::string num) {
     if ((peek() == 'e' || peek() == 'E')) {  // scientific notation
         num += advance();
         if (!std::isdigit(peek()) && peek() != '+' && peek() != '-') {
-            // TODO: throw an error - invalid syntax
+            throw std::runtime_error("invalid syntax");
         }
         // power can only be an integer in scientific notation in python
         if (peek() == '+' || peek() == '-') {
             if (!std::isdigit(peekNext())) {
-                // TODO: throw an error - invalid syntax
+                throw std::runtime_error("invalid syntax");
             }
             num += advance();
         }
@@ -112,7 +113,7 @@ void Lexer::scanNumber(std::string num) {
     }
 
     if (std::isalnum(peek()) || peek() == '_' || peek() == '.') {
-        // TODO: throw an error, invalid floating point number
+        throw std::runtime_error("invalid floating point number");
     }
 
     Token token(TokenType::NUMBER, num, line, start);
@@ -125,9 +126,9 @@ void Lexer::scanString(std::string str) {
         str += advance();
     }
     if (isAtEnd()) {
-        // TODO: throw an error
+        throw std::runtime_error("unterminated string - reached endOfFile");
     } else if (peek() == '\n') {
-        // TODO: throw an error
+        throw std::runtime_error("unterminated string - reached newLine");
     } else {
         str += advance();
     }
@@ -265,7 +266,7 @@ std::vector<Token> Lexer::scan_Tokens() {
                 tokens.push_back(token);
                 continue;
             } else {
-                // TODO: throw an error
+                throw std::runtime_error("invalid symbol - '!'");
             }
         }
 
@@ -302,7 +303,7 @@ std::vector<Token> Lexer::scan_Tokens() {
                     advance();
                 }
             } else {
-                // TODO: throw an error - unexpected character
+                throw std::runtime_error("unexpected character");
             }
         }
     }

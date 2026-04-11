@@ -13,12 +13,12 @@ void test(std::string input_code, std::vector<std::pair<TokenType, std::string>>
     std::vector<Token> tokens = lexer.scan_Tokens();
 
     for (int i = 0; i < expected.size(); i++) {
-        if (i >= tokens.size() || 
+        if (i >= tokens.size() ||
             tokens[i].type != expected[i].first ||
-            tokens[i].value != expected[i].second) {  
-            
+            tokens[i].value != expected[i].second) {
+
             std::cout << "F" << std::flush;
-            
+
             std::string error = "FAIL: \"" + input_code + "\"\n";
             error += "  Token " + std::to_string(i) + " mismatch\n";
             error += "  Expected: " + expected[i].second + "\n";
@@ -27,13 +27,13 @@ void test(std::string input_code, std::vector<std::pair<TokenType, std::string>>
             } else {
                 error += "  Got:      <missing token>\n";
             }
-            
+
             failure_messages.push_back(error);
             failed++;
             return;
         }
     }
-    
+
     std::cout << "." << std::flush;
     passed++;
 }
@@ -537,6 +537,16 @@ int main() {
         {TokenType::DEDENT,     ""},
         {TokenType::EOF_TOKEN,  ""}});
 
+    test("print(\"hello\\n\", x)", {
+        {TokenType::PRINT,      "print"},
+        {TokenType::LPAREN,     "("},
+        {TokenType::STRING,     "\"hello\\n\""},
+        {TokenType::COMMA,      ","},
+        {TokenType::IDENTIFIER, "x"},
+        {TokenType::RPAREN,     ")"},
+        {TokenType::NEWLINE,    "\n"},
+        {TokenType::EOF_TOKEN,  ""}});
+
     std::cout << "\n\n";
 
     if (!failure_messages.empty()) {
@@ -554,5 +564,5 @@ int main() {
     }
     std::cout << " =========================\n";
 
-    return failed > 0 ? 1 : 0; 
+    return failed > 0 ? 1 : 0;
 }
