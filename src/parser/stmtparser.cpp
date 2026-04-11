@@ -10,11 +10,11 @@ StmtParser::StmtParser(std::vector<Token> tokens)
 
 Token StmtParser::peek() {
     if (index < tokens.size()) {
-    if (index < tokens.size()) {
-        return tokens[index];
-    } else {
-        return tokens.back();  // EOF Token
-    }
+        if (index < tokens.size()) {
+            return tokens[index];
+        } else {
+            return tokens.back();  // EOF Token
+        }
     } else {
         return tokens.back();  // EOF Token
     }
@@ -22,11 +22,11 @@ Token StmtParser::peek() {
 
 Token StmtParser::peekNext() {
     if (index + 1 < tokens.size()) {
-    if (index + 1 < tokens.size()) {
-        return tokens[index + 1];
-    } else {
-        return tokens.back();  // EOF Token
-    }
+        if (index + 1 < tokens.size()) {
+            return tokens[index + 1];
+        } else {
+            return tokens.back();  // EOF Token
+        }
     } else {
         return tokens.back();  // EOF Token
     }
@@ -34,9 +34,9 @@ Token StmtParser::peekNext() {
 
 void StmtParser::advance() {
     if (index < tokens.size()) {
-    if (index < tokens.size()) {
-        index++;
-    }
+        if (index < tokens.size()) {
+            index++;
+        }
     }
 }
 
