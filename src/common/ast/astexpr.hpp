@@ -7,7 +7,8 @@ enum class ASTExprNodeType {
     BINARY, //binary operators
     UNARY, //unary operators
     STRING, //string literals
-    NUMBER, //number literals
+    DOUBLE, //double literals
+    INTEGER, //integer literals
     BOOLEAN, //boolean literals
     NONE, //None
     REFERENCE //variable(identifier) references
@@ -77,11 +78,18 @@ public:
     std::string value;
 };
 
-class NumberNode : public ASTExprNode {
+class DoubleNode : public ASTExprNode {
 public:
-    NumberNode(double value);
+    DoubleNode(double value);
 
     double value;
+};
+
+class IntegerNode : public ASTExprNode {
+public:
+    IntegerNode(long long value);
+
+    long long value;
 };
 
 class BooleanNode : public ASTExprNode {

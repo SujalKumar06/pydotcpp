@@ -12,7 +12,9 @@ UnaryOperatorNode::UnaryOperatorNode(OperatorType op, std::unique_ptr<ASTExprNod
 StringNode::StringNode(std::string value)
     : ASTExprNode(ASTExprNodeType::STRING), value(std::move(value)) {}
 
-NumberNode::NumberNode(double value) : ASTExprNode(ASTExprNodeType::NUMBER), value(value) {}
+DoubleNode::DoubleNode(double value) : ASTExprNode(ASTExprNodeType::DOUBLE), value(value) {}
+
+IntegerNode::IntegerNode(long long value) : ASTExprNode(ASTExprNodeType::INTEGER), value(value) {}
 
 BooleanNode::BooleanNode(bool value) : ASTExprNode(ASTExprNodeType::BOOLEAN), value(value) {}
 
