@@ -9,13 +9,14 @@ enum class ASTStmtNodeType {
     VAR_DECL, //all declaration statements of the type x = y
     PRINT_STMT, //print(something) will all go here
     IF_STMT,    //if statement. Points to condition (BINARY or UNARY or other relevant nodes) and BLOCK
-    ELIF_STMT, //elif statement. Points to BLOCK
     ELSE_STMT,  //else statement. Points to BLOCK
     WHILE_STMT, //while block. Points to condition and BLOCK
     FOR_STMT, //for block. Points to condition for looping and BLOCK
     BLOCK,  //reference to a vector of ASTNodes that are in a block
-    PROGRAM //root node
-};
+    PROGRAM, //root node
+    BREAK_STMT, // break
+    CONTINUE_STMT, // continue
+    };
 
 //abstract ASTStmtNode class
 class ASTStmtNode {
@@ -97,4 +98,14 @@ public:
     ProgramNode();
 
     std::vector<std::unique_ptr<ASTStmtNode>> statements;
+};
+
+class BreakStmtNode : public ASTStmtNode{
+    public:
+    BreakStmtNode();
+};
+
+class ContinueStmtNode : public ASTStmtNode{
+    public:
+    ContinueStmtNode();
 };

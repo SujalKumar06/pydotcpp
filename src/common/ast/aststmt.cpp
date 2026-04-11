@@ -15,14 +15,6 @@ IfStmtNode::IfStmtNode(std::unique_ptr<ASTExprNode> condition, std::unique_ptr<A
       elif_ptr(nullptr),
       else_ptr(nullptr) {}
 
-ElifStmtNode::ElifStmtNode(std::unique_ptr<ASTExprNode> condition,
-                           std::unique_ptr<ASTStmtNode> block)
-    : ASTStmtNode(ASTStmtNodeType::ELIF_STMT),
-      condition(std::move(condition)),
-      block(std::move(block)),
-      elif_ptr(nullptr),
-      else_ptr(nullptr) {}
-
 ElseStmtNode::ElseStmtNode(std::unique_ptr<ASTStmtNode> block)
     : ASTStmtNode(ASTStmtNodeType::ELSE_STMT), block(std::move(block)) {}
 
@@ -40,3 +32,7 @@ ForStmtNode::ForStmtNode(std::unique_ptr<ASTExprNode> condition, std::unique_ptr
 BlockNode::BlockNode() : ASTStmtNode(ASTStmtNodeType::BLOCK) {}
 
 ProgramNode::ProgramNode() : ASTStmtNode(ASTStmtNodeType::PROGRAM) {}
+
+BreakStmtNode::BreakStmtNode() : ASTStmtNode(ASTStmtNodeType::BREAK_STMT) {}
+
+ContinueStmtNode::ContinueStmtNode() : ASTStmtNode(ASTStmtNodeType::CONTINUE_STMT) {}
