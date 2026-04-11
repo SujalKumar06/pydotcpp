@@ -1,5 +1,6 @@
 #include "exprparser.hpp"
 
+#include <cmath>
 #include <stdexcept>
 
 ExprParser::ExprParser(std::vector<Token>& tokens, int& index) : tokens(tokens), index(index) {}
@@ -199,8 +200,21 @@ std::unique_ptr<ASTExprNode> ExprParser::parsePrimary() {
     advance();
     switch (token.type) {
         case TokenType::NUMBER: {
-            double value = std::stod(token.value);
-            return std::make_unique<NumberNode>(value);
+            // double-integer differentiation because i don't want to touch lexer
+            bool isdouble = token.value.find('.') != std::string::npos ||
+                            token.value.find('e') != std::string::npos ||
+                            token.value.find('E') != std::string::npos;
+
+            if (isdouble)
+                return std::make_unique<DoubleNode>(std::stod(token.value));
+            else {
+                try {
+                    return std::make_unique<IntegerNode>(std::stoll(token.value));
+                } catch (const std::out_of_range&) {
+                    throw std::runtime_error(
+                        "integer literal out of range(only long long ints are supported)");
+                }
+            }
         }
         case TokenType::STRING:
             return std::make_unique<StringNode>(std::move(token.value));

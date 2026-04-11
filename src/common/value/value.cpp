@@ -1,5 +1,6 @@
 #include "value.hpp"
 
+#include <climits>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
@@ -14,11 +15,14 @@ bool isEquals(const Value& lhs, const Value& rhs) {
             if constexpr (std::is_same_v<ltype, rtype>)
                 return lhs == rhs;
 
-            // True is 1.0 and False is 0.0
-            else if constexpr (std::is_same_v<ltype, bool> && std::is_same_v<rtype, double>)
-                return (lhs ? 1.0 : 0.0) == rhs;
-            else if constexpr (std::is_same_v<ltype, double> && std::is_same_v<rtype, bool>)
-                return lhs == (rhs ? 1.0 : 0.0);
+            else if constexpr (std::is_arithmetic_v<ltype> && std::is_arithmetic_v<rtype>) {
+                // if lhs or rhs is double, compare as double
+                if constexpr (std::is_same_v<ltype, double> || std::is_same_v<rtype, double>) {
+                    return static_cast<double>(lhs) == static_cast<double>(rhs);
+                }
+                // else compare as integers
+                return static_cast<long long>(lhs) == static_cast<long long>(rhs);
+            }
 
             // not equals
             else
@@ -35,9 +39,12 @@ bool isTruthy(const Value& val) {
             // None
             if constexpr (std::is_same_v<T, std::monostate>)
                 return false;
-            // number
+            // double
             else if constexpr (std::is_same_v<T, double>)
                 return val != 0.0;
+            // integer
+            else if constexpr (std::is_same_v<T, long long>)
+                return val != 0LL;
             // bool
             else if constexpr (std::is_same_v<T, bool>)
                 return val;
@@ -52,8 +59,8 @@ bool isTruthy(const Value& val) {
         val);
 }
 
-// helper function to deal with boolean-double operations
-double toNumber(const Value& val, std::string err) {
+// helper function to deal with double conversion operations
+double toDouble(const Value& val, std::string err) {
     return std::visit(
         [&err](auto&& val) -> double {
             using T = std::decay_t<decltype(val)>;
@@ -62,9 +69,117 @@ double toNumber(const Value& val, std::string err) {
                 return val;
             else if constexpr (std::is_same_v<T, bool>)
                 return (val ? 1.0 : 0.0);
-
+            else if constexpr (std::is_same_v<T, long long>)
+                return static_cast<double>(val);
             else
                 throw std::runtime_error(err);
         },
         val);
+}
+
+// helper function to deal with integer conversion operations
+long long toInteger(const Value& val, std::string err) {
+    return std::visit(
+        [&err](auto&& val) -> long long {
+            using T = std::decay_t<decltype(val)>;
+
+            if constexpr (std::is_same_v<T, long long>)
+                return val;
+            else if constexpr (std::is_same_v<T, bool>)
+                return (val ? 1LL : 0LL);
+            else
+                throw std::runtime_error(err);
+        },
+        val);
+}
+
+// safe ops
+
+// binary exponentiation
+long long binexp(long long base, long long exp) {
+    if (exp < 0)
+        throw std::runtime_error("negative exponent not supported for integer pow");
+
+    long long result = 1;
+    long long curr   = base;
+    long long e      = exp;
+
+    while (e > 0) {
+        if (e & 1)
+            result = safeMul(result, curr);
+
+        curr = safeMul(curr, curr);
+        e >>= 1;
+    }
+    return result;
+}
+
+long long safeAdd(long long a, long long b) {
+    if ((b > 0 && a > LLONG_MAX - b) || (b < 0 && a < LLONG_MIN - b)) {
+        throw std::runtime_error("integer overflow in addition");
+    }
+    return a + b;
+}
+
+long long safeSub(long long a, long long b) {
+    if ((b < 0 && a > LLONG_MAX + b) || (b > 0 && a < LLONG_MIN + b)) {
+        throw std::runtime_error("integer overflow in subtraction");
+    }
+    return a - b;
+}
+
+long long safeMul(long long a, long long b) {
+    if (a == 0 || b == 0)
+        return 0;
+
+    if (a == -1 && b == LLONG_MIN)
+        throw std::runtime_error("integer overflow in multiplication");
+    if (b == -1 && a == LLONG_MIN)
+        throw std::runtime_error("integer overflow in multiplication");
+
+    if (a > 0) {
+        if (b > 0) {
+            if (a > LLONG_MAX / b)
+                throw std::runtime_error("integer overflow in multiplication");
+        } else {
+            if (b < LLONG_MIN / a)
+                throw std::runtime_error("integer overflow in multiplication");
+        }
+    } else {
+        if (b > 0) {
+            if (a < LLONG_MIN / b)
+                throw std::runtime_error("integer overflow in multiplication");
+        } else {
+            if (a != 0 && b < LLONG_MAX / a)
+                throw std::runtime_error("integer overflow in multiplication");
+        }
+    }
+
+    return a * b;
+}
+
+long long safeDiv(long long a, long long b) {
+    if (b == 0)
+        throw std::runtime_error("division by zero");
+
+    if (a == LLONG_MIN && b == -1)
+        throw std::runtime_error("integer overflow in division");
+
+    return a / b;
+}
+
+long long safeMod(long long a, long long b) {
+    if (b == 0)
+        throw std::runtime_error("modulo by zero");
+
+    if (a == LLONG_MIN && b == -1)
+        return 0;
+
+    long long r = a % b;
+
+    if (r != 0 && ((r > 0 && b < 0) || (r < 0 && b > 0))) {
+        r += b;
+    }
+
+    return r;
 }
