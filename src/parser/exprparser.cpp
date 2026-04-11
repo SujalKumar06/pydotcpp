@@ -217,7 +217,7 @@ std::unique_ptr<ASTExprNode> ExprParser::parsePrimary() {
             }
         }
         case TokenType::STRING: {
-            //removing starting and ending quotes
+            // removing starting and ending quotes
             std::string val = token.value.substr(1, token.value.size() - 2);
             return std::make_unique<StringNode>(std::move(val));
         }
