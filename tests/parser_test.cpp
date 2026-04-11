@@ -114,14 +114,18 @@ std::string convertExprASTNodeToString(ASTExprNode* node) {
     if (node == nullptr)
         return "nullptr";
 
-    if (NumberNode* num = dynamic_cast<NumberNode*>(node)) {
+    if (IntegerNode* num = dynamic_cast<IntegerNode*>(node)) {
+        return std::to_string(num->value);
+    }
+
+    if (DoubleNode* num = dynamic_cast<DoubleNode*>(node)) {
         std::ostringstream oss;
         oss << num->value;
         return oss.str();
     }
 
     if (StringNode* str = dynamic_cast<StringNode*>(node)) {
-        return str->value;
+        return "\""+ str->value + "\"";
     }
 
     if (BooleanNode* bool_node = dynamic_cast<BooleanNode*>(node)) {
