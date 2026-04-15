@@ -23,7 +23,7 @@ void Environment::assign(const std::string& name, const Value& val) {
 }
 
 Runner::Runner() {
-    env = std::make_shared<Environment>(nullptr);
+    env       = std::make_shared<Environment>(nullptr);
     returnval = std::monostate{};
 }
 
@@ -107,8 +107,10 @@ ReturnType Runner::runStmt(const ASTStmtNode& stmt) {
 
         case ASTStmtNodeType::RETURN_STMT: {
             const ReturnStmtNode& returnstmt = static_cast<const ReturnStmtNode&>(stmt);
-            if (returnstmt.value) returnval = evalExpr(*returnstmt.value);
-            else returnval = std::monostate{};
+            if (returnstmt.value)
+                returnval = evalExpr(*returnstmt.value);
+            else
+                returnval = std::monostate{};
             return ReturnType::RETURN;
         }
 
@@ -119,13 +121,8 @@ ReturnType Runner::runStmt(const ASTStmtNode& stmt) {
 
         case ASTStmtNodeType::FUNC_DECL: {
             const FunctionDeclNode& fundeclnode = static_cast<const FunctionDeclNode&>(stmt);
-            Value func = std::make_shared<Function>(
-                Function{
-                    fundeclnode.params,
-                    fundeclnode.body,
-                    env
-                }
-            );
+            Value func =
+                std::make_shared<Function>(Function{fundeclnode.params, fundeclnode.body, env});
 
             env->assign(fundeclnode.name, func);
             return ReturnType::NORMAL;
@@ -144,7 +141,7 @@ Value Runner::evalExpr(const ASTExprNode& expr) {
             return evalUnary(static_cast<const UnaryOperatorNode&>(expr));
 
         case ASTExprNodeType::CALL:
-            return evalCall(static_cast<const CallNode&> (expr));
+            return evalCall(static_cast<const CallNode&>(expr));
 
         case ASTExprNodeType::STRING:
         case ASTExprNodeType::DOUBLE:
@@ -229,10 +226,12 @@ Value Runner::evalUnary(const UnaryOperatorNode& expr) {
 
 Value Runner::evalCall(const CallNode& expr) {
     Value callee = evalExpr(*expr.callee);
-    if (!std::holds_alternative<std::shared_ptr<Function>>(callee)) throw std::runtime_error("non-callable object being called");
+    if (!std::holds_alternative<std::shared_ptr<Function>>(callee))
+        throw std::runtime_error("non-callable object being called");
 
     std::shared_ptr<Function> func = std::get<std::shared_ptr<Function>>(callee);
-    if (func->params.size() != expr.args.size()) throw std::runtime_error("unexpected number of arguments passed into function");
+    if (func->params.size() != expr.args.size())
+        throw std::runtime_error("unexpected number of arguments passed into function");
 
     auto newenv = std::make_shared<Environment>(func->closure);
     for (int i = 0; i < func->params.size(); i++) {
@@ -240,17 +239,20 @@ Value Runner::evalCall(const CallNode& expr) {
     }
 
     auto prev = env;
-    env = newenv;
+    env       = newenv;
 
     ReturnType ret = runStmt(*func->body);
-    env = prev;
+    env            = prev;
 
-    if (ret == ReturnType::BREAK) throw std::runtime_error("break outside loop");
-    else if (ret == ReturnType::CONTINUE) throw std::runtime_error("continue outside loop");
-    else if (ret == ReturnType::NORMAL) returnval = std::monostate{};
+    if (ret == ReturnType::BREAK)
+        throw std::runtime_error("break outside loop");
+    else if (ret == ReturnType::CONTINUE)
+        throw std::runtime_error("continue outside loop");
+    else if (ret == ReturnType::NORMAL)
+        returnval = std::monostate{};
 
     Value evaled = returnval;
-    returnval = std::monostate{};
+    returnval    = std::monostate{};
 
     return evaled;
 }
