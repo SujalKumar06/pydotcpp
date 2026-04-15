@@ -470,6 +470,8 @@ void Runner::printValue(const Value& val) {
                 std::cout << (v ? "True" : "False") << '\n';
             else if constexpr (std::is_same_v<T, std::string>)
                 printString(v);
+            else if constexpr (std::is_same_v<T, std::shared_ptr<Function>>)
+                std::cout << "<function at " << v << ">" << '\n';
             else
                 std::cout << v << '\n';
         },
