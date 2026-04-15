@@ -18,8 +18,26 @@ bool isEquals(const Value& lhs, const Value& rhs) {
             else if constexpr (std::is_arithmetic_v<ltype> && std::is_arithmetic_v<rtype>) {
                 // if lhs or rhs is double, compare as double
                 // TODO: Find a better way to do this
-                if constexpr (std::is_same_v<ltype, double> || std::is_same_v<rtype, double>) {
-                    return static_cast<double>(lhs) == static_cast<double>(rhs);
+                auto lldcomp = [](double d, long long ll) -> bool {
+                    // < -2**63 or >= 2**63 (based on long long limits)
+                    if (d < -9223372036854775808.0 || d >= 9223372036854775808.0)
+                        return false;
+
+                    long long dconv = static_cast<long long>(d);
+                    if (static_cast<double>(dconv) != d)
+                        return false;
+
+                    return ll == dconv;
+                };
+
+                if constexpr (std::is_same_v<ltype, double>) {
+                    double doubleval = static_cast<double>(lhs);
+                    long long llval  = static_cast<long long>(rhs);
+                    return lldcomp(doubleval, llval);
+                } else if constexpr (std::is_same_v<rtype, double>) {
+                    double doubleval = static_cast<double>(rhs);
+                    long long llval  = static_cast<long long>(lhs);
+                    return lldcomp(doubleval, llval);
                 }
                 // else compare as integers
                 return static_cast<long long>(lhs) == static_cast<long long>(rhs);
@@ -109,8 +127,9 @@ long long binexp(long long base, long long exp) {
         if (e & 1)
             result = safeMul(result, curr);
 
-        curr = safeMul(curr, curr);
         e >>= 1;
+        if (e > 0)
+            curr = safeMul(curr, curr);
     }
     return result;
 }
