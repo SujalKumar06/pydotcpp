@@ -17,6 +17,7 @@ bool isEquals(const Value& lhs, const Value& rhs) {
 
             else if constexpr (std::is_arithmetic_v<ltype> && std::is_arithmetic_v<rtype>) {
                 // if lhs or rhs is double, compare as double
+                // TODO: Find a better way to do this
                 if constexpr (std::is_same_v<ltype, double> || std::is_same_v<rtype, double>) {
                     return static_cast<double>(lhs) == static_cast<double>(rhs);
                 }

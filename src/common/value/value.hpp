@@ -15,8 +15,8 @@ using Value = std::variant<
 //helpers related to Value
 bool isEquals(const Value& lhs, const Value& rhs);
 bool isTruthy(const Value& val);
-long long toInteger(const Value& val, std::string err = "cannot perform double conversion");
-double toDouble(const Value& val, std::string err = "cannot perform integer conversion");
+long long toInteger(const Value& val, std::string err = "cannot perform integer conversion");
+double toDouble(const Value& val, std::string err = "cannot perform double conversion");
 
 //safe ops
 long long binexp(long long base, long long exp);
