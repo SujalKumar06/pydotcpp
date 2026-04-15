@@ -5,6 +5,13 @@ ASTStmtNode::ASTStmtNode(ASTStmtNodeType type) : type(type) {}
 VarDeclNode::VarDeclNode(std::unique_ptr<ASTExprNode> name, std::unique_ptr<ASTExprNode> value)
     : ASTStmtNode(ASTStmtNodeType::VAR_DECL), name(std::move(name)), value(std::move(value)) {}
 
+FunctionDeclNode::FunctionDeclNode(std::string name, std::vector<std::string> params,
+                                   std::unique_ptr<ASTStmtNode> body)
+    : ASTStmtNode(ASTStmtNodeType::FUNC_DECL),
+      name(std::move(name)),
+      params(std::move(params)),
+      body(std::move(body)) {}
+
 PrintStmtNode::PrintStmtNode(std::unique_ptr<ASTExprNode> expr)
     : ASTStmtNode(ASTStmtNodeType::PRINT_STMT), expr(std::move(expr)) {}
 
@@ -36,3 +43,9 @@ ProgramNode::ProgramNode() : ASTStmtNode(ASTStmtNodeType::PROGRAM) {}
 BreakStmtNode::BreakStmtNode() : ASTStmtNode(ASTStmtNodeType::BREAK_STMT) {}
 
 ContinueStmtNode::ContinueStmtNode() : ASTStmtNode(ASTStmtNodeType::CONTINUE_STMT) {}
+
+ReturnStmtNode::ReturnStmtNode(std::unique_ptr<ASTExprNode> value)
+    : ASTStmtNode(ASTStmtNodeType::RETURN_STMT), value(std::move(value)) {}
+
+ExprStmtNode::ExprStmtNode(std::unique_ptr<ASTExprNode> expr)
+    : ASTStmtNode(ASTStmtNodeType::EXPR_STMT), expr(std::move(expr)) {}
