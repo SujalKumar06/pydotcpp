@@ -9,6 +9,10 @@ BinaryOperatorNode::BinaryOperatorNode(OperatorType op, std::unique_ptr<ASTExprN
 UnaryOperatorNode::UnaryOperatorNode(OperatorType op, std::unique_ptr<ASTExprNode> rhs)
     : ASTExprNode(ASTExprNodeType::UNARY), op(op), rhs(std::move(rhs)) {}
 
+CallNode::CallNode(std::unique_ptr<ASTExprNode> callee,
+                   std::vector<std::unique_ptr<ASTExprNode>> args)
+    : ASTExprNode(ASTExprNodeType::CALL), callee(std::move(callee)), args(std::move(args)) {}
+
 StringNode::StringNode(std::string value)
     : ASTExprNode(ASTExprNodeType::STRING), value(std::move(value)) {}
 

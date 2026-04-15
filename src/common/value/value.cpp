@@ -53,9 +53,9 @@ bool isTruthy(const Value& val) {
             else if constexpr (std::is_same_v<T, std::string>)
                 return !val.empty();
 
-            // fallback
+            // fallback(everything's truthy unless it's falsy)
             else
-                return false;
+                return true;
         },
         val);
 }

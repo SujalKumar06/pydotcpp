@@ -15,6 +15,7 @@ public:
 private:
     //precedence parsing(from highest precedence to lowest precedence)
     std::unique_ptr<ASTExprNode> parsePrimary();
+    std::unique_ptr<ASTExprNode> parsePostfix();
     std::unique_ptr<ASTExprNode> parsePower();
     std::unique_ptr<ASTExprNode> parseUnary();
     std::unique_ptr<ASTExprNode> parseMultiplicative();

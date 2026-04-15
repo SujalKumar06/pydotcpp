@@ -5,7 +5,27 @@
 #include <stdexcept>
 #include <type_traits>
 
-Runner::Runner() {}
+Environment::Environment(std::shared_ptr<Environment> parent) : parent(std::move(parent)) {}
+
+Value Environment::get(const std::string& name) {
+    auto it = values.find(name);
+    if (it != values.end())
+        return it->second;
+
+    if (parent)
+        return parent->get(name);
+    else
+        throw std::runtime_error("undefined variable referenced");
+}
+
+void Environment::assign(const std::string& name, const Value& val) {
+    values[name] = val;
+}
+
+Runner::Runner() {
+    env = std::make_shared<Environment>(nullptr);
+    returnval = std::monostate{};
+}
 
 ReturnType Runner::runStmt(const ASTStmtNode& stmt) {
     switch (stmt.type) {
@@ -17,6 +37,8 @@ ReturnType Runner::runStmt(const ASTStmtNode& stmt) {
                     throw std::runtime_error("break outside loop");
                 else if (ret == ReturnType::CONTINUE)
                     throw std::runtime_error("continue outside loop");
+                else if (ret == ReturnType::RETURN)
+                    throw std::runtime_error("cannot return from program body");
             }
 
             return ReturnType::NORMAL;
@@ -37,29 +59,13 @@ ReturnType Runner::runStmt(const ASTStmtNode& stmt) {
             const VarDeclNode& vardecl = static_cast<const VarDeclNode&>(stmt);
             std::string name           = static_cast<const ReferenceNode&>(*vardecl.name).name;
             Value rhs                  = evalExpr(*vardecl.value);
-            env[name]                  = rhs;
+            env->assign(name, rhs);
             return ReturnType::NORMAL;
         }
 
         case ASTStmtNodeType::PRINT_STMT: {
             Value val = evalExpr(*static_cast<const PrintStmtNode&>(stmt).expr);
-
-            // printing to stdout
-            std::visit(
-                [this](auto&& v) -> void {
-                    using T = std::decay_t<decltype(v)>;
-
-                    if constexpr (std::is_same_v<T, std::monostate>)
-                        std::cout << "None" << '\n';
-                    else if constexpr (std::is_same_v<T, bool>)
-                        std::cout << (v ? "True" : "False") << '\n';
-                    else if constexpr (std::is_same_v<T, std::string>)
-                        prettyPrint(v);
-                    else
-                        std::cout << v << '\n';
-                },
-                val);
-
+            printValue(val);
             return ReturnType::NORMAL;
         }
 
@@ -99,6 +105,32 @@ ReturnType Runner::runStmt(const ASTStmtNode& stmt) {
         case ASTStmtNodeType::BREAK_STMT:
             return ReturnType::BREAK;
 
+        case ASTStmtNodeType::RETURN_STMT: {
+            const ReturnStmtNode& returnstmt = static_cast<const ReturnStmtNode&>(stmt);
+            if (returnstmt.value) returnval = evalExpr(*returnstmt.value);
+            else returnval = std::monostate{};
+            return ReturnType::RETURN;
+        }
+
+        case ASTStmtNodeType::EXPR_STMT: {
+            evalExpr(*static_cast<const ExprStmtNode&>(stmt).expr);
+            return ReturnType::NORMAL;
+        }
+
+        case ASTStmtNodeType::FUNC_DECL: {
+            const FunctionDeclNode& fundeclnode = static_cast<const FunctionDeclNode&>(stmt);
+            Value func = std::make_shared<Function>(
+                Function{
+                    fundeclnode.params,
+                    fundeclnode.body,
+                    env
+                }
+            );
+
+            env->assign(fundeclnode.name, func);
+            return ReturnType::NORMAL;
+        }
+
         default:
             throw std::runtime_error("unexpected stmt node type");
     }
@@ -110,6 +142,9 @@ Value Runner::evalExpr(const ASTExprNode& expr) {
             return evalBinary(static_cast<const BinaryOperatorNode&>(expr));
         case ASTExprNodeType::UNARY:
             return evalUnary(static_cast<const UnaryOperatorNode&>(expr));
+
+        case ASTExprNodeType::CALL:
+            return evalCall(static_cast<const CallNode&> (expr));
 
         case ASTExprNodeType::STRING:
         case ASTExprNodeType::DOUBLE:
@@ -147,9 +182,9 @@ Value Runner::evalBinary(const BinaryOperatorNode& expr) {
 
     switch (expr.op) {
         case OperatorType::EQEQUAL:
-            return Value(isEquals(lhs, rhs));
+            return isEquals(lhs, rhs);
         case OperatorType::NOTEQUAL:
-            return Value(!isEquals(lhs, rhs));
+            return !isEquals(lhs, rhs);
 
         case OperatorType::GREATERTHAN:
         case OperatorType::GREATEREQUAL:
@@ -176,45 +211,69 @@ Value Runner::evalUnary(const UnaryOperatorNode& expr) {
 
     switch (expr.op) {
         case OperatorType::NOT:
-            return Value(!isTruthy(rhs));
+            return !isTruthy(rhs);
         case OperatorType::PLUS: {
             if (std::holds_alternative<double>(rhs))
-                return Value(toDouble(rhs));
-            return Value(toInteger(rhs));
+                return toDouble(rhs);
+            return toInteger(rhs);
         }
         case OperatorType::MINUS: {
             if (std::holds_alternative<double>(rhs))
-                return Value(-toDouble(rhs));
-            return Value(-toInteger(rhs));
+                return -toDouble(rhs);
+            return -toInteger(rhs);
         }
         default:
             throw std::runtime_error("unexpected unary operator type");
     }
 }
 
+Value Runner::evalCall(const CallNode& expr) {
+    Value callee = evalExpr(*expr.callee);
+    if (!std::holds_alternative<std::shared_ptr<Function>>(callee)) throw std::runtime_error("non-callable object being called");
+
+    std::shared_ptr<Function> func = std::get<std::shared_ptr<Function>>(callee);
+    if (func->params.size() != expr.args.size()) throw std::runtime_error("unexpected number of arguments passed into function");
+
+    auto newenv = std::make_shared<Environment>(func->closure);
+    for (int i = 0; i < func->params.size(); i++) {
+        newenv->assign(func->params[i], evalExpr(*expr.args[i]));
+    }
+
+    auto prev = env;
+    env = newenv;
+
+    ReturnType ret = runStmt(*func->body);
+    env = prev;
+
+    if (ret == ReturnType::BREAK) throw std::runtime_error("break outside loop");
+    else if (ret == ReturnType::CONTINUE) throw std::runtime_error("continue outside loop");
+    else if (ret == ReturnType::NORMAL) returnval = std::monostate{};
+
+    Value evaled = returnval;
+    returnval = std::monostate{};
+
+    return evaled;
+}
+
 Value Runner::evalPrimary(const ASTExprNode& expr) {
     switch (expr.type) {
         case ASTExprNodeType::STRING:
-            return Value(static_cast<const StringNode&>(expr).value);
+            return static_cast<const StringNode&>(expr).value;
         case ASTExprNodeType::DOUBLE:
-            return Value(static_cast<const DoubleNode&>(expr).value);
+            return static_cast<const DoubleNode&>(expr).value;
         case ASTExprNodeType::INTEGER:
-            return Value(static_cast<const IntegerNode&>(expr).value);
+            return static_cast<const IntegerNode&>(expr).value;
         case ASTExprNodeType::BOOLEAN:
-            return Value(static_cast<const BooleanNode&>(expr).value);
+            return static_cast<const BooleanNode&>(expr).value;
 
         case ASTExprNodeType::REFERENCE: {
             std::string name = static_cast<const ReferenceNode&>(expr).name;
-            auto it          = env.find(name);
-
-            if (it != env.end())
-                return it->second;
-            throw std::runtime_error("undefined variable encountered");
+            return env->get(name);
         }
 
         // None
         case ASTExprNodeType::NONE:
-            return Value(std::monostate{});
+            return std::monostate{};
 
         default:
             throw std::runtime_error("unexpected primary expr type");
@@ -225,13 +284,13 @@ Value Runner::compareValues(const Value& lhs, const Value& rhs, OperatorType op)
     auto cmp = [&](auto lval, auto rval) -> Value {
         switch (op) {
             case OperatorType::GREATERTHAN:
-                return Value(lval > rval);
+                return lval > rval;
             case OperatorType::GREATEREQUAL:
-                return Value(lval >= rval);
+                return lval >= rval;
             case OperatorType::LESSEQUAL:
-                return Value(lval <= rval);
+                return lval <= rval;
             case OperatorType::LESSERTHAN:
-                return Value(lval < rval);
+                return lval < rval;
 
             default:
                 throw std::runtime_error("unexpected comparison operator type");
@@ -253,16 +312,16 @@ Value Runner::arithmeticValues(const Value& lhs, const Value& rhs, OperatorType 
             // string+string
             if (std::holds_alternative<std::string>(lhs) &&
                 std::holds_alternative<std::string>(rhs)) {
-                return Value(std::get<std::string>(lhs) + std::get<std::string>(rhs));
+                return std::get<std::string>(lhs) + std::get<std::string>(rhs);
             }
 
             std::string err = "addition between incompatible types";
 
             // double
             if (std::holds_alternative<double>(lhs) || std::holds_alternative<double>(rhs))
-                return Value(toDouble(lhs, err) + toDouble(rhs, err));
+                return toDouble(lhs, err) + toDouble(rhs, err);
             // integer
-            return Value(safeAdd(toInteger(lhs, err), toInteger(rhs, err)));
+            return safeAdd(toInteger(lhs, err), toInteger(rhs, err));
         }
 
         case OperatorType::STAR: {
@@ -281,7 +340,7 @@ Value Runner::arithmeticValues(const Value& lhs, const Value& rhs, OperatorType 
                         "strings can only be multiplied by non-negative integral values");
 
                 std::string str = std::get<std::string>(lhs);
-                return Value(mulstr(str, num));
+                return mulstr(str, num);
             }
 
             // num*string
@@ -292,16 +351,16 @@ Value Runner::arithmeticValues(const Value& lhs, const Value& rhs, OperatorType 
                         "strings can only be multiplied by non-negative integral values");
 
                 std::string str = std::get<std::string>(rhs);
-                return Value(mulstr(str, num));
+                return mulstr(str, num);
             }
 
             std::string err = "multiplication between incompatible types";
 
             // double
             if (std::holds_alternative<double>(lhs) || std::holds_alternative<double>(rhs))
-                return Value(toDouble(lhs, err) * toDouble(rhs, err));
+                return toDouble(lhs, err) * toDouble(rhs, err);
             // integer
-            return Value(safeMul(toInteger(lhs, err), toInteger(rhs, err)));
+            return safeMul(toInteger(lhs, err), toInteger(rhs, err));
         }
 
         case OperatorType::MINUS: {
@@ -309,9 +368,9 @@ Value Runner::arithmeticValues(const Value& lhs, const Value& rhs, OperatorType 
 
             // double
             if (std::holds_alternative<double>(lhs) || std::holds_alternative<double>(rhs))
-                return Value(toDouble(lhs, err) - toDouble(rhs, err));
+                return toDouble(lhs, err) - toDouble(rhs, err);
             // integer
-            return Value(safeSub(toInteger(lhs, err), toInteger(rhs, err)));
+            return safeSub(toInteger(lhs, err), toInteger(rhs, err));
         }
 
         case OperatorType::SLASH: {
@@ -323,7 +382,7 @@ Value Runner::arithmeticValues(const Value& lhs, const Value& rhs, OperatorType 
 
             if (rdouble == 0.0)
                 throw std::runtime_error("division by zero");
-            return Value(ldouble / rdouble);
+            return ldouble / rdouble;
         }
 
         case OperatorType::FLOORDIV: {
@@ -336,11 +395,11 @@ Value Runner::arithmeticValues(const Value& lhs, const Value& rhs, OperatorType 
 
                 if (rdouble == 0.0)
                     throw std::runtime_error("division by zero");
-                return Value(std::floor(ldouble / rdouble));
+                return std::floor(ldouble / rdouble);
             }
 
             // integer
-            return Value(safeDiv(toInteger(lhs, err), toInteger(rhs, err)));
+            return safeDiv(toInteger(lhs, err), toInteger(rhs, err));
         }
 
         case OperatorType::MODULO: {
@@ -357,11 +416,11 @@ Value Runner::arithmeticValues(const Value& lhs, const Value& rhs, OperatorType 
                 double mod = std::fmod(ldouble, rdouble);
                 if ((mod != 0) && ((rdouble > 0 && mod < 0) || (rdouble < 0 && mod > 0)))
                     mod += rdouble;
-                return Value(mod);
+                return mod;
             }
 
             // integer
-            return Value(safeMod(toInteger(lhs, err), toInteger(rhs, err)));
+            return safeMod(toInteger(lhs, err), toInteger(rhs, err));
         }
 
         case OperatorType::POWER: {
@@ -375,7 +434,7 @@ Value Runner::arithmeticValues(const Value& lhs, const Value& rhs, OperatorType 
                 if (std::isnan(power))
                     throw std::runtime_error("complex/imaginary results are not supported");
 
-                return Value(power);
+                return power;
             }
 
             // integer
@@ -388,10 +447,10 @@ Value Runner::arithmeticValues(const Value& lhs, const Value& rhs, OperatorType 
                 if (std::isnan(power))
                     throw std::runtime_error("complex/imaginary results are not supported");
 
-                return Value(power);
+                return power;
             }
 
-            return Value(binexp(lint, rint));
+            return binexp(lint, rint);
         }
 
         default:
@@ -399,7 +458,25 @@ Value Runner::arithmeticValues(const Value& lhs, const Value& rhs, OperatorType 
     }
 }
 
-void Runner::prettyPrint(const std::string& str) {
+void Runner::printValue(const Value& val) {
+    // printing to stdout
+    std::visit(
+        [this](auto&& v) -> void {
+            using T = std::decay_t<decltype(v)>;
+
+            if constexpr (std::is_same_v<T, std::monostate>)
+                std::cout << "None" << '\n';
+            else if constexpr (std::is_same_v<T, bool>)
+                std::cout << (v ? "True" : "False") << '\n';
+            else if constexpr (std::is_same_v<T, std::string>)
+                printString(v);
+            else
+                std::cout << v << '\n';
+        },
+        val);
+}
+
+void Runner::printString(const std::string& str) {
     std::string result;
 
     for (size_t i = 0; i < str.size(); i++) {

@@ -170,7 +170,7 @@ std::unique_ptr<ASTExprNode> ExprParser::parseUnary() {
 }
 
 std::unique_ptr<ASTExprNode> ExprParser::parsePower() {
-    auto lhs = parsePrimary();
+    auto lhs = parsePostfix();
 
     // right associative
     if (match(TokenType::POWER)) {
@@ -178,6 +178,38 @@ std::unique_ptr<ASTExprNode> ExprParser::parsePower() {
         auto rhs = parseUnary();
         return std::make_unique<BinaryOperatorNode>(OperatorType::POWER, std::move(lhs),
                                                     std::move(rhs));
+    }
+
+    return lhs;
+}
+
+std::unique_ptr<ASTExprNode> ExprParser::parsePostfix() {
+    auto lhs = parsePrimary();
+
+    while (true) {
+        // add indexing as another if statement here
+        if (match(TokenType::LPAREN)) {
+            advance();
+            std::vector<std::unique_ptr<ASTExprNode>> args;
+
+            if (!match(TokenType::RPAREN)) {
+                args.push_back(parseExpr());
+
+                while (match(TokenType::COMMA)) {
+                    advance();
+                    args.push_back(parseExpr());
+                }
+            }
+
+            if (!match(TokenType::RPAREN)) {
+                throw std::runtime_error("expected closing parenthesis");
+            }
+            advance();
+
+            lhs = std::make_unique<CallNode>(std::move(lhs), std::move(args));
+        } else {
+            break;
+        }
     }
 
     return lhs;

@@ -2,10 +2,12 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 
 enum class ASTExprNodeType {
     BINARY, //binary operators
     UNARY, //unary operators
+    CALL, //function calls
     STRING, //string literals
     DOUBLE, //double literals
     INTEGER, //integer literals
@@ -69,6 +71,14 @@ public:
     //operator type
     OperatorType op;
     std::unique_ptr<ASTExprNode> rhs;
+};
+
+class CallNode : public ASTExprNode {
+public:
+    CallNode(std::unique_ptr<ASTExprNode> callee, std::vector<std::unique_ptr<ASTExprNode>> args);
+
+    std::unique_ptr<ASTExprNode> callee;
+    std::vector<std::unique_ptr<ASTExprNode>> args;
 };
 
 class StringNode : public ASTExprNode {

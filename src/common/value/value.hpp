@@ -1,7 +1,15 @@
 #pragma once
 
+#include "aststmt.hpp"
+
 #include <variant>
 #include <string>
+#include <memory>
+#include <vector>
+
+//function
+struct Function;
+class Environment; //defined in runner.hpp
 
 //runtime value representation
 using Value = std::variant<
@@ -9,8 +17,15 @@ using Value = std::variant<
     double,
     std::string,
     bool,
-    std::monostate
+    std::monostate,
+    std::shared_ptr<Function>
 >;
+
+struct Function {
+    std::vector<std::string> params;
+    std::shared_ptr<ASTStmtNode> body;
+    std::shared_ptr<Environment> closure;
+};
 
 //helpers related to Value
 bool isEquals(const Value& lhs, const Value& rhs);
