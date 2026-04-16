@@ -43,11 +43,8 @@ std::unique_ptr<ASTStmtNode> StmtParser::parseBlock() {
             advance();
             continue;
         }
-        auto stmt = parseStatement();
-        if (stmt) {  // Check that there is code - stmt is not a nullptr
-            block->statements.push_back(
-                std::move(stmt));  // Store all statements as a vector in the block
-        }
+        block->statements.push_back(
+            parseStatement());  // Store all statements as a vector in the block
     }
     // A block must close with a DEDENT
     if (peek().type == TokenType::DEDENT) {
@@ -137,6 +134,8 @@ std::unique_ptr<ASTStmtNode> StmtParser::parseStatement() {
     //     return parseForStatement();
     else if (peek().type == TokenType::IDENTIFIER && peekNext().type == TokenType::ASSIGN) {
         return parseVarDeclaration();
+    } else if (peek().type == TokenType::DEF) {
+        return parseFunctionDeclaration();
     } else if (peek().type == TokenType::IF) {
         return parseIfStatement();
     } else if (peek().type == TokenType::WHILE) {
@@ -153,11 +152,19 @@ std::unique_ptr<ASTStmtNode> StmtParser::parseStatement() {
             advance();
         }
         return std::make_unique<ContinueStmtNode>();
-    } else {
-        ignoreExpressionStatement();  // fallback
+    } else if (peek().type == TokenType::RETURN) {
         advance();
-        return nullptr;
-    }
+        if (peek().type == TokenType::NEWLINE || peek().type == TokenType::EOF_TOKEN) {
+            if (peek().type == TokenType::NEWLINE)
+                advance();
+            return std::make_unique<ReturnStmtNode>(nullptr);
+        }
+        auto value = exprparser.parseExpr();
+        if (peek().type == TokenType::NEWLINE)
+            advance();
+        return std::make_unique<ReturnStmtNode>(std::move(value));
+    } else
+        return parseExpressionStatement();  // fallback
 }
 
 std::unique_ptr<ASTStmtNode> StmtParser::parseVarDeclaration() {
@@ -176,6 +183,50 @@ std::unique_ptr<ASTStmtNode> StmtParser::parseVarDeclaration() {
     return std::make_unique<VarDeclNode>(std::move(nameNode), std::move(value));
 }
 
+std::unique_ptr<ASTStmtNode> StmtParser::parseFunctionDeclaration() {
+    advance();
+
+    if (peek().type != TokenType::IDENTIFIER)
+        throw std::runtime_error("invalid function name");
+    std::string name = peek().value;
+    advance();
+
+    if (peek().type != TokenType::LPAREN)
+        throw std::runtime_error("expected '(' in function declaration");
+    advance();
+
+    std::vector<std::string> params;
+    if (peek().type != TokenType::RPAREN) {
+        if (peek().type != TokenType::IDENTIFIER)
+            throw std::runtime_error("invalid parameter name");
+        params.push_back(peek().value);
+        advance();
+
+        while (peek().type == TokenType::COMMA) {
+            advance();
+            if (peek().type != TokenType::IDENTIFIER)
+                throw std::runtime_error("invalid parameter name");
+            params.push_back(peek().value);
+            advance();
+        }
+    }
+
+    if (peek().type != TokenType::RPAREN)
+        throw std::runtime_error("expected closing ')' in function declaration");
+    advance();
+
+    if (peek().type != TokenType::COLON)
+        throw std::runtime_error("expected ':' in function declaration");
+    advance();
+
+    if (peek().type == TokenType::NEWLINE)
+        advance();
+
+    auto body = parseBlock();
+
+    return std::make_unique<FunctionDeclNode>(std::move(name), std::move(params), std::move(body));
+}
+
 std::unique_ptr<ASTStmtNode> StmtParser::parsePrintStatement() {
     advance();
     auto expr = exprparser.parseExpr();
@@ -185,6 +236,10 @@ std::unique_ptr<ASTStmtNode> StmtParser::parsePrintStatement() {
     return std::make_unique<PrintStmtNode>(std::move(expr));
 }
 
-// TODO: Think if just ignoring an expression statement is ok,
-// how to make it better
-void StmtParser::ignoreExpressionStatement() {}
+std::unique_ptr<ASTStmtNode> StmtParser::parseExpressionStatement() {
+    auto expr = exprparser.parseExpr();
+    if (peek().type == TokenType::NEWLINE)
+        advance();
+
+    return std::make_unique<ExprStmtNode>(std::move(expr));
+}

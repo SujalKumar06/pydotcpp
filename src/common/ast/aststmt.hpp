@@ -7,6 +7,7 @@
 
 enum class ASTStmtNodeType {
     VAR_DECL, //all declaration statements of the type x = y
+    FUNC_DECL, //function declaration
     PRINT_STMT, //print(something) will all go here
     IF_STMT,    //if statement. Points to condition (BINARY or UNARY or other relevant nodes) and BLOCK
     ELSE_STMT,  //else statement. Points to BLOCK
@@ -14,9 +15,11 @@ enum class ASTStmtNodeType {
     FOR_STMT, //for block. Points to condition for looping and BLOCK
     BLOCK,  //reference to a vector of ASTNodes that are in a block
     PROGRAM, //root node
-    BREAK_STMT, // break
-    CONTINUE_STMT, // continue
-    };
+    BREAK_STMT, //break
+    CONTINUE_STMT, //continue
+    RETURN_STMT, //return
+    EXPR_STMT, //expression statement(to account for function side-effects)
+};
 
 //abstract ASTStmtNode class
 class ASTStmtNode {
@@ -34,6 +37,15 @@ public:
 
     std::unique_ptr<ASTExprNode> name; //A reference node which stores the name of the variable
     std::unique_ptr<ASTExprNode> value; //A number, string or boolean node that stores the value inside the variable
+};
+
+class FunctionDeclNode : public ASTStmtNode {
+public:
+    FunctionDeclNode(std::string name, std::vector<std::string> params, std::unique_ptr<ASTStmtNode> body);
+
+    std::string name;
+    std::vector<std::string> params;
+    std::shared_ptr<ASTStmtNode> body;
 };
 
 class PrintStmtNode : public ASTStmtNode {
@@ -100,12 +112,27 @@ public:
     std::vector<std::unique_ptr<ASTStmtNode>> statements;
 };
 
-class BreakStmtNode : public ASTStmtNode{
-    public:
+class BreakStmtNode : public ASTStmtNode {
+public:
     BreakStmtNode();
 };
 
-class ContinueStmtNode : public ASTStmtNode{
-    public:
+class ContinueStmtNode : public ASTStmtNode {
+public:
     ContinueStmtNode();
 };
+
+class ReturnStmtNode : public ASTStmtNode {
+public:
+    ReturnStmtNode(std::unique_ptr<ASTExprNode> value);
+
+    std::unique_ptr<ASTExprNode> value;
+};
+
+class ExprStmtNode : public ASTStmtNode {
+public:
+    ExprStmtNode(std::unique_ptr<ASTExprNode> expr);
+
+    std::unique_ptr<ASTExprNode> expr;
+};
+

@@ -1,5 +1,6 @@
 #include "exprparser.hpp"
 
+#include <cmath>
 #include <stdexcept>
 
 ExprParser::ExprParser(std::vector<Token>& tokens, int& index) : tokens(tokens), index(index) {}
@@ -169,7 +170,7 @@ std::unique_ptr<ASTExprNode> ExprParser::parseUnary() {
 }
 
 std::unique_ptr<ASTExprNode> ExprParser::parsePower() {
-    auto lhs = parsePrimary();
+    auto lhs = parsePostfix();
 
     // right associative
     if (match(TokenType::POWER)) {
@@ -177,6 +178,38 @@ std::unique_ptr<ASTExprNode> ExprParser::parsePower() {
         auto rhs = parseUnary();
         return std::make_unique<BinaryOperatorNode>(OperatorType::POWER, std::move(lhs),
                                                     std::move(rhs));
+    }
+
+    return lhs;
+}
+
+std::unique_ptr<ASTExprNode> ExprParser::parsePostfix() {
+    auto lhs = parsePrimary();
+
+    while (true) {
+        // add indexing as another if statement here
+        if (match(TokenType::LPAREN)) {
+            advance();
+            std::vector<std::unique_ptr<ASTExprNode>> args;
+
+            if (!match(TokenType::RPAREN)) {
+                args.push_back(parseExpr());
+
+                while (match(TokenType::COMMA)) {
+                    advance();
+                    args.push_back(parseExpr());
+                }
+            }
+
+            if (!match(TokenType::RPAREN)) {
+                throw std::runtime_error("expected closing parenthesis");
+            }
+            advance();
+
+            lhs = std::make_unique<CallNode>(std::move(lhs), std::move(args));
+        } else {
+            break;
+        }
     }
 
     return lhs;
@@ -199,11 +232,27 @@ std::unique_ptr<ASTExprNode> ExprParser::parsePrimary() {
     advance();
     switch (token.type) {
         case TokenType::NUMBER: {
-            double value = std::stod(token.value);
-            return std::make_unique<NumberNode>(value);
+            // double-integer differentiation because i don't want to touch lexer
+            bool isdouble = token.value.find('.') != std::string::npos ||
+                            token.value.find('e') != std::string::npos ||
+                            token.value.find('E') != std::string::npos;
+
+            if (isdouble)
+                return std::make_unique<DoubleNode>(std::stod(token.value));
+            else {
+                try {
+                    return std::make_unique<IntegerNode>(std::stoll(token.value));
+                } catch (const std::out_of_range&) {
+                    throw std::runtime_error(
+                        "integer literal out of range(only long long ints are supported)");
+                }
+            }
         }
-        case TokenType::STRING:
-            return std::make_unique<StringNode>(std::move(token.value));
+        case TokenType::STRING: {
+            // removing starting and ending quotes
+            std::string val = token.value.substr(1, token.value.size() - 2);
+            return std::make_unique<StringNode>(std::move(val));
+        }
         case TokenType::TRUE:
             return std::make_unique<BooleanNode>(true);
         case TokenType::FALSE:

@@ -9,6 +9,9 @@ OBJS := $(SRCS:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 INCS := $(shell find $(SRC_DIR) -type d)
 
+ENTRYPOINT := entrypoint.cpp
+ENTRY_OBJ := $(BUILD_DIR)/entrypoint.o
+
 LEXER_TEST := $(BUILD_DIR)/$(TEST_DIR)/lexer_test
 PARSER_TEST := $(BUILD_DIR)/$(TEST_DIR)/parser_test
 EVALUATOR_TEST := $(BUILD_DIR)/$(TEST_DIR)/evaluator_test
@@ -24,10 +27,10 @@ CXX := g++
 all: $(BUILD_DIR)/$(TARGET_EXEC)
 
 #executable dependencies
-$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
+$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS) $(ENTRY_OBJ)
 	@echo "Linking"
 	mkdir -p $(BUILD_DIR)
-	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
+	$(CXX) $(OBJS) $(ENTRY_OBJ) -o $@ $(LDFLAGS)
 
 #object dependencies
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
@@ -35,6 +38,10 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) -c $< -o $@
 	@echo
+
+$(ENTRY_OBJ): $(ENTRYPOINT)
+	mkdir -p $(BUILD_DIR)
+	$(CXX) $(CPPFLAGS) -c $< -o $@
 
 #for change in header files
 -include $(DEPS)

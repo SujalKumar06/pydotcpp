@@ -2,12 +2,15 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 
 enum class ASTExprNodeType {
     BINARY, //binary operators
     UNARY, //unary operators
+    CALL, //function calls
     STRING, //string literals
-    NUMBER, //number literals
+    DOUBLE, //double literals
+    INTEGER, //integer literals
     BOOLEAN, //boolean literals
     NONE, //None
     REFERENCE //variable(identifier) references
@@ -17,7 +20,7 @@ enum class OperatorType {
     //logical
     OR, // or
     AND, // and
-    NOT, // not
+    NOT, // not(unary)
 
     //comparisons
     GREATERTHAN, // >
@@ -70,6 +73,14 @@ public:
     std::unique_ptr<ASTExprNode> rhs;
 };
 
+class CallNode : public ASTExprNode {
+public:
+    CallNode(std::unique_ptr<ASTExprNode> callee, std::vector<std::unique_ptr<ASTExprNode>> args);
+
+    std::unique_ptr<ASTExprNode> callee;
+    std::vector<std::unique_ptr<ASTExprNode>> args;
+};
+
 class StringNode : public ASTExprNode {
 public:
     StringNode(std::string value);
@@ -77,11 +88,18 @@ public:
     std::string value;
 };
 
-class NumberNode : public ASTExprNode {
+class DoubleNode : public ASTExprNode {
 public:
-    NumberNode(double value);
+    DoubleNode(double value);
 
     double value;
+};
+
+class IntegerNode : public ASTExprNode {
+public:
+    IntegerNode(long long value);
+
+    long long value;
 };
 
 class BooleanNode : public ASTExprNode {
