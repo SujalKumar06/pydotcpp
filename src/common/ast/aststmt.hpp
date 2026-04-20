@@ -6,7 +6,8 @@
 #include "astexpr.hpp"
 
 enum class ASTStmtNodeType {
-    VAR_DECL, //all declaration statements of the type x = y
+    ASSIGN, //all assign statements of the type x = y
+    COMPOUND, //all compound statements of the type x +=/-=/*=/etc y
     FUNC_DECL, //function declaration
     PRINT_STMT, //print(something) will all go here
     IF_STMT,    //if statement. Points to condition (BINARY or UNARY or other relevant nodes) and BLOCK
@@ -31,12 +32,21 @@ public:
     ASTStmtNodeType type;
 };
 
-class VarDeclNode : public ASTStmtNode {
+class AssignNode : public ASTStmtNode {
 public:
-    VarDeclNode(std::unique_ptr<ASTExprNode> name, std::unique_ptr<ASTExprNode> value);
+    AssignNode(std::unique_ptr<ASTExprNode> lhs, std::unique_ptr<ASTExprNode> value);
 
-    std::unique_ptr<ASTExprNode> name; //A reference node which stores the name of the variable
-    std::unique_ptr<ASTExprNode> value; //A number, string or boolean node that stores the value inside the variable
+    std::unique_ptr<ASTExprNode> lhs; //lhs of assignment
+    std::unique_ptr<ASTExprNode> value; //value to be assigned
+};
+
+class CompoundNode : public ASTStmtNode {
+public:
+    CompoundNode(std::unique_ptr<ASTExprNode> lhs, std::unique_ptr<ASTExprNode> value, OperatorType op);
+
+    std::unique_ptr<ASTExprNode> lhs; //lhs of compound assignment
+    std::unique_ptr<ASTExprNode> value; //value to be compound assignment
+    OperatorType op;
 };
 
 class FunctionDeclNode : public ASTStmtNode {

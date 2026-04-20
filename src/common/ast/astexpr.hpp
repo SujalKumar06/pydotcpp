@@ -12,8 +12,10 @@ enum class ASTExprNodeType {
     DOUBLE, //double literals
     INTEGER, //integer literals
     BOOLEAN, //boolean literals
+    LIST, //list literals
     NONE, //None
-    REFERENCE //variable(identifier) references
+    REFERENCE, //variable(identifier) references
+    INDEX //indexing operations
 };
 
 enum class OperatorType {
@@ -109,6 +111,13 @@ public:
     bool value;
 };
 
+class ListNode : public ASTExprNode {
+public:
+    ListNode(std::vector<std::unique_ptr<ASTExprNode>> elements);
+
+    std::vector<std::unique_ptr<ASTExprNode>> elements;
+};
+
 class NoneNode : public ASTExprNode {
 public:
     NoneNode();
@@ -119,4 +128,12 @@ public:
     ReferenceNode(std::string name);
 
     std::string name;
+};
+
+class IndexNode : public ASTExprNode {
+public:
+    IndexNode(std::unique_ptr<ASTExprNode> lhs, std::unique_ptr<ASTExprNode> index);
+
+    std::unique_ptr<ASTExprNode> lhs;
+    std::unique_ptr<ASTExprNode> index;
 };
