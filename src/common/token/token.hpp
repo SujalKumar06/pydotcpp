@@ -51,6 +51,9 @@ enum class TokenType {
     LPAREN, // (
     RPAREN, // )
 
+    LBRACKET, // [
+    RBRACKET, // ]
+
     NEWLINE,
     EOF_TOKEN,
 

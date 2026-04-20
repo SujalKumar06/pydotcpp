@@ -44,6 +44,7 @@ private:
     Value evalBinary(const BinaryOperatorNode& expr);
     Value evalUnary(const UnaryOperatorNode& expr);
     Value evalCall(const CallNode& expr);
+    Value evalIndex(const IndexNode& expr);
     Value evalPrimary(const ASTExprNode& expr);
 
     //value operation helpers
@@ -51,6 +52,8 @@ private:
     Value arithmeticValues(const Value& lhs, const Value& rhs, OperatorType op);
 
     //stmt eval helpers
-    void printValue(const Value& str);
+    void Assign(const ASTExprNode& lhs, const Value& rhs);
+    std::string reprValue(const Value& val);
+    void printValue(const Value& val);
     void printString(const std::string& str);
 };

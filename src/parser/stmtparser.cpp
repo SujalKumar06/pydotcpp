@@ -129,11 +129,6 @@ std::unique_ptr<ASTStmtNode> StmtParser::parseStatement() {
 
     if (peek().type == TokenType::PRINT) {
         return parsePrintStatement();
-    }
-    // } else if (peek().type == TokenType::FOR) {
-    //     return parseForStatement();
-    else if (peek().type == TokenType::IDENTIFIER && peekNext().type == TokenType::ASSIGN) {
-        return parseVarDeclaration();
     } else if (peek().type == TokenType::DEF) {
         return parseFunctionDeclaration();
     } else if (peek().type == TokenType::IF) {
@@ -164,23 +159,54 @@ std::unique_ptr<ASTStmtNode> StmtParser::parseStatement() {
             advance();
         return std::make_unique<ReturnStmtNode>(std::move(value));
     } else
-        return parseExpressionStatement();  // fallback
+        return parseAssignCompound();  // assignment, compound and exprstatements
 }
 
-std::unique_ptr<ASTStmtNode> StmtParser::parseVarDeclaration() {
-    Token nameToken = peek();
-    advance();  // variable name
-    advance();  // =
+std::unique_ptr<ASTStmtNode> StmtParser::parseAssignCompound() {
+    auto lhs = exprparser.parseExpr();
 
-    auto value = exprparser.parseExpr();  // RHS
+    switch (peek().type) {
+        case TokenType::ASSIGN: {
+            if (!(lhs->type == ASTExprNodeType::REFERENCE || lhs->type == ASTExprNodeType::INDEX))
+                throw std::runtime_error("invalid assignment target");
 
-    if (peek().type == TokenType::NEWLINE)
-        advance();
+            advance();
+            auto rhs = exprparser.parseExpr();
 
-    auto nameNode = std::make_unique<ReferenceNode>(nameToken.value);
+            if (peek().type == TokenType::NEWLINE)
+                advance();
 
-    // return the node
-    return std::make_unique<VarDeclNode>(std::move(nameNode), std::move(value));
+            return std::make_unique<AssignNode>(std::move(lhs), std::move(rhs));
+        }
+
+        case TokenType::PLUSEQUAL:
+        case TokenType::MINUSEQUAL:
+        case TokenType::STAREQUAL:
+        case TokenType::SLASHEQUAL:
+        case TokenType::FLOOREQUAL:
+        case TokenType::POWEREQUAL:
+        case TokenType::MODULOEQUAL: {
+            if (!(lhs->type == ASTExprNodeType::REFERENCE || lhs->type == ASTExprNodeType::INDEX))
+                throw std::runtime_error("invalid compound target");
+
+            OperatorType op = exprparser.toOperatorType(peek().type);
+            advance();
+
+            auto rhs = exprparser.parseExpr();
+
+            if (peek().type == TokenType::NEWLINE)
+                advance();
+
+            return std::make_unique<CompoundNode>(std::move(lhs), std::move(rhs), op);
+        }
+
+        default: {
+            if (peek().type == TokenType::NEWLINE)
+                advance();
+
+            return std::make_unique<ExprStmtNode>(std::move(lhs));
+        }
+    }
 }
 
 std::unique_ptr<ASTStmtNode> StmtParser::parseFunctionDeclaration() {
@@ -234,12 +260,4 @@ std::unique_ptr<ASTStmtNode> StmtParser::parsePrintStatement() {
         advance();
     }
     return std::make_unique<PrintStmtNode>(std::move(expr));
-}
-
-std::unique_ptr<ASTStmtNode> StmtParser::parseExpressionStatement() {
-    auto expr = exprparser.parseExpr();
-    if (peek().type == TokenType::NEWLINE)
-        advance();
-
-    return std::make_unique<ExprStmtNode>(std::move(expr));
 }

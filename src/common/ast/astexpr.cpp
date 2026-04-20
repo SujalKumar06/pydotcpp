@@ -22,7 +22,13 @@ IntegerNode::IntegerNode(long long value) : ASTExprNode(ASTExprNodeType::INTEGER
 
 BooleanNode::BooleanNode(bool value) : ASTExprNode(ASTExprNodeType::BOOLEAN), value(value) {}
 
+ListNode::ListNode(std::vector<std::unique_ptr<ASTExprNode>> elements)
+    : ASTExprNode(ASTExprNodeType::LIST), elements(std::move(elements)) {}
+
 NoneNode::NoneNode() : ASTExprNode(ASTExprNodeType::NONE) {}
 
 ReferenceNode::ReferenceNode(std::string name)
     : ASTExprNode(ASTExprNodeType::REFERENCE), name(std::move(name)) {}
+
+IndexNode::IndexNode(std::unique_ptr<ASTExprNode> lhs, std::unique_ptr<ASTExprNode> index)
+    : ASTExprNode(ASTExprNodeType::INDEX), lhs(std::move(lhs)), index(std::move(index)) {}

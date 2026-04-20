@@ -12,6 +12,9 @@ public:
     ExprParser(std::vector<Token>& tokens, int& index);
     std::unique_ptr<ASTExprNode> parseExpr();
 
+    //helper
+    OperatorType toOperatorType(TokenType type);
+
 private:
     //precedence parsing(from highest precedence to lowest precedence)
     std::unique_ptr<ASTExprNode> parsePrimary();
@@ -30,7 +33,6 @@ private:
     Token peekNext();
     void advance();
     bool match(TokenType type);
-    OperatorType toOperatorType(TokenType type);
 
     std::vector<Token>& tokens;
     int& index; //index in the token vector(reference to the index of StmtParser for consistency)

@@ -9,6 +9,7 @@
 
 //function
 struct Function;
+struct List;
 class Environment; //defined in runner.hpp
 
 //runtime value representation
@@ -18,13 +19,18 @@ using Value = std::variant<
     std::string,
     bool,
     std::monostate,
-    std::shared_ptr<Function>
+    std::shared_ptr<Function>,
+    std::shared_ptr<List>
 >;
 
 struct Function {
     std::vector<std::string> params;
     std::shared_ptr<ASTStmtNode> body;
     std::shared_ptr<Environment> closure;
+};
+
+struct List {
+    std::vector<Value> elements;
 };
 
 //helpers related to Value
