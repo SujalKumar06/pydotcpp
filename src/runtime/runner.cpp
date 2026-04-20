@@ -306,6 +306,7 @@ Value Runner::evalExpr(const ASTExprNode& expr) {
         case ASTExprNodeType::DOUBLE:
         case ASTExprNodeType::INTEGER:
         case ASTExprNodeType::BOOLEAN:
+        case ASTExprNodeType::LIST:
         case ASTExprNodeType::REFERENCE:
         case ASTExprNodeType::NONE:
             return evalPrimary(expr);
