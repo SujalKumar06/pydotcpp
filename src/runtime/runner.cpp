@@ -23,6 +23,17 @@ void Environment::assign(const std::string& name, const Value& val) {
     values[name] = val;
 }
 
+void Environment::update(const std::string& name, const Value& val) {
+    auto it = values.find(name);
+    if (it == values.end()) {
+        if (parent)
+            parent->update(name, val);
+        else
+            throw std::runtime_error("undefined variable referenced");
+    }
+    it->second = val;
+}
+
 Runner::Runner() {
     env       = std::make_shared<Environment>(nullptr);
     returnval = std::monostate{};
@@ -59,7 +70,16 @@ ReturnType Runner::runStmt(const ASTStmtNode& stmt) {
         case ASTStmtNodeType::ASSIGN: {
             const AssignNode& assign = static_cast<const AssignNode&>(stmt);
             Value rhs                = evalExpr(*assign.value);
-            Assign(*assign.lhs, rhs);
+
+            if (assign.lhs->type == ASTExprNodeType::REFERENCE) {
+                std::string name = static_cast<const ReferenceNode&>(*assign.lhs).name;
+                env->assign(name, rhs);
+            } else if (assign.lhs->type == ASTExprNodeType::INDEX) {
+                const IndexNode& index = static_cast<const IndexNode&>(*assign.lhs);
+                indexAssign(index, rhs);
+            } else
+                throw std::runtime_error("invalid assignment/compound target");
+
             return ReturnType::NORMAL;
         }
 
@@ -94,7 +114,16 @@ ReturnType Runner::runStmt(const ASTStmtNode& stmt) {
                 }
             }
 
-            Assign(*compound.lhs, arithmeticValues(lhs, rhs, compound.op));
+            rhs = arithmeticValues(lhs, rhs, compound.op);
+            if (compound.lhs->type == ASTExprNodeType::REFERENCE) {
+                std::string name = static_cast<const ReferenceNode&>(*compound.lhs).name;
+                env->update(name, rhs);
+            } else if (compound.lhs->type == ASTExprNodeType::INDEX) {
+                const IndexNode& index = static_cast<const IndexNode&>(*compound.lhs);
+                indexAssign(index, rhs);
+            } else
+                throw std::runtime_error("invalid assignment/compound target");
+
             return ReturnType::NORMAL;
         }
 
@@ -168,33 +197,26 @@ ReturnType Runner::runStmt(const ASTStmtNode& stmt) {
     }
 }
 
-void Runner::Assign(const ASTExprNode& lhs, const Value& rhs) {
-    if (lhs.type == ASTExprNodeType::REFERENCE) {
-        std::string name = static_cast<const ReferenceNode&>(lhs).name;
-        env->assign(name, rhs);
-    } else if (lhs.type == ASTExprNodeType::INDEX) {
-        const IndexNode& indexnode = static_cast<const IndexNode&>(lhs);
-        Value lval                 = evalExpr(*indexnode.lhs);
+void Runner::indexAssign(const IndexNode& indexnode, const Value& rhs) {
+    Value lval = evalExpr(*indexnode.lhs);
 
-        if (!(std::holds_alternative<std::shared_ptr<List>>(lval) ||
-              std::holds_alternative<std::string>(lval)))
-            throw std::runtime_error("non-indexable object being indexed");
+    if (!(std::holds_alternative<std::shared_ptr<List>>(lval) ||
+          std::holds_alternative<std::string>(lval)))
+        throw std::runtime_error("non-indexable object being indexed");
 
-        long long index = toInteger(evalExpr(*indexnode.index), "index should be an integer");
+    long long index = toInteger(evalExpr(*indexnode.index), "index should be an integer");
 
-        if (std::holds_alternative<std::shared_ptr<List>>(lval)) {
-            std::shared_ptr<List> list = std::get<std::shared_ptr<List>>(lval);
+    if (std::holds_alternative<std::shared_ptr<List>>(lval)) {
+        std::shared_ptr<List> list = std::get<std::shared_ptr<List>>(lval);
 
-            if (index < 0LL)
-                index += list->elements.size();
-            if (index < 0LL || index >= list->elements.size())
-                throw std::runtime_error("list index out of range");
+        if (index < 0LL)
+            index += list->elements.size();
+        if (index < 0LL || index >= list->elements.size())
+            throw std::runtime_error("list index out of range");
 
-            list->elements[index] = rhs;
-        } else
-            throw std::runtime_error("strings are immutable");
+        list->elements[index] = rhs;
     } else
-        throw std::runtime_error("invalid assignment/compound target");
+        throw std::runtime_error("strings are immutable");
 }
 
 std::string Runner::reprValue(const Value& val) {
