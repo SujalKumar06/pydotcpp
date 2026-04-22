@@ -99,6 +99,7 @@ ReturnType Runner::runStmt(const ASTStmtNode& stmt) {
                     std::shared_ptr<List> rhslist = std::get<std::shared_ptr<List>>(rhs);
                     lhslist->elements.insert(lhslist->elements.end(), rhslist->elements.begin(),
                                              rhslist->elements.end());
+                    return ReturnType::NORMAL;
                 } else if (compound.op == OperatorType::STAR) {
                     long long num = toInteger(rhs, "multiplication between incompatible types");
                     if (num < 0)
@@ -111,6 +112,7 @@ ReturnType Runner::runStmt(const ASTStmtNode& stmt) {
                     for (long long i = 0; i < num; i++)
                         lhslist->elements.insert(lhslist->elements.end(), copied.begin(),
                                                  copied.end());
+                    return ReturnType::NORMAL;
                 }
             }
 
