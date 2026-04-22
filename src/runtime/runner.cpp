@@ -249,7 +249,7 @@ std::string Runner::reprValue(const Value& val) {
                 }
                 return std::string("[") + repr + std::string("]");
             } else
-                return v;
+                return std::string("\"") + v + std::string("\"");
         },
         val);
 }
