@@ -466,7 +466,7 @@ Value Runner::evalIndex(const IndexNode& expr) {
         if (index < 0 || index >= string.size())
             throw std::runtime_error("string index out of range");
 
-        return string[index];
+        return std::string(1, string[index]);
     }
 }
 
