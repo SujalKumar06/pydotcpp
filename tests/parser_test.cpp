@@ -180,8 +180,8 @@ std::string convertStmtASTNodeToString(ASTStmtNode* node) {
         return "(PRINT: " + convertExprASTNodeToString(print_stmt->expr.get()) + " :END-OF-PRINT)";
     }
 
-    if (VarDeclNode* var_decl = dynamic_cast<VarDeclNode*>(node)) {
-        return "(VAR-DECL: VAR_NAME = " + convertExprASTNodeToString(var_decl->name.get()) +
+    if (AssignNode* var_decl = dynamic_cast<AssignNode*>(node)) {
+        return "(VAR-DECL: VAR_NAME = " + convertExprASTNodeToString(var_decl->lhs.get()) +
                " VAR_VALUE = " + convertExprASTNodeToString(var_decl->value.get()) +
                " :END-OF-VAR-DECL)";
     }

@@ -58,6 +58,8 @@ inline const std::unordered_map<std::string, TokenType> operators = {
 inline const std::unordered_map<std::string, TokenType> delimiters = {
     {"(",  TokenType::LPAREN},
     {")",  TokenType::RPAREN},
+    {"[", TokenType::LBRACKET},
+    {"]", TokenType::RBRACKET},
     {",",  TokenType::COMMA},
     {":",  TokenType::COLON},
     {"\n", TokenType::NEWLINE},

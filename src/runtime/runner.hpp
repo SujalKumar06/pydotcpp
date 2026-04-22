@@ -21,6 +21,7 @@ public:
     Environment(std::shared_ptr<Environment> parent);
     Value get(const std::string& name);
     void assign(const std::string& name, const Value& val);
+    void update(const std::string& name, const Value& val);
 
 private:
     std::unordered_map<std::string, Value> values;
@@ -44,6 +45,7 @@ private:
     Value evalBinary(const BinaryOperatorNode& expr);
     Value evalUnary(const UnaryOperatorNode& expr);
     Value evalCall(const CallNode& expr);
+    Value evalIndex(const IndexNode& expr);
     Value evalPrimary(const ASTExprNode& expr);
 
     //value operation helpers
@@ -51,6 +53,8 @@ private:
     Value arithmeticValues(const Value& lhs, const Value& rhs, OperatorType op);
 
     //stmt eval helpers
-    void printValue(const Value& str);
+    void indexAssign(const IndexNode& lhs, const Value& rhs);
+    std::string reprValue(const Value& val);
+    void printValue(const Value& val);
     void printString(const std::string& str);
 };

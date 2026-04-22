@@ -27,7 +27,7 @@ class StmtParser {
     // statement parsing
     std::unique_ptr<ASTStmtNode> parseStatement();
     std::unique_ptr<ASTStmtNode> parsePrintStatement();
-    std::unique_ptr<ASTStmtNode> parseVarDeclaration();
+    std::unique_ptr<ASTStmtNode> parseAssignCompound();
     std::unique_ptr<ASTStmtNode> parseFunctionDeclaration();
     std::unique_ptr<ASTStmtNode> parseBlock(); //helper function for indented blocks
     std::unique_ptr<ASTStmtNode> parseIfStatement();

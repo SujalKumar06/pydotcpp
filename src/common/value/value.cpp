@@ -12,12 +12,27 @@ bool isEquals(const Value& lhs, const Value& rhs) {
             using rtype = std::decay_t<decltype(rhs)>;
 
             // compile-time branching with constexpr
-            if constexpr (std::is_same_v<ltype, rtype>)
+            if constexpr (std::is_same_v<ltype, std::shared_ptr<List>> &&
+                          std::is_same_v<rtype, std::shared_ptr<List>>) {
+                if (lhs == rhs)
+                    return true;
+
+                if (lhs->elements.size() != rhs->elements.size())
+                    return false;
+
+                for (int i = 0; i < lhs->elements.size(); i++) {
+                    if (!isEquals(lhs->elements[i], rhs->elements[i]))
+                        return false;
+                }
+
+                return true;
+            }
+
+            else if constexpr (std::is_same_v<ltype, rtype>)
                 return lhs == rhs;
 
             else if constexpr (std::is_arithmetic_v<ltype> && std::is_arithmetic_v<rtype>) {
                 // if lhs or rhs is double, compare as double
-                // TODO: Find a better way to do this
                 auto lldcomp = [](double d, long long ll) -> bool {
                     // < -2**63 or >= 2**63 (based on long long limits)
                     if (d < -9223372036854775808.0 || d >= 9223372036854775808.0)
@@ -70,7 +85,9 @@ bool isTruthy(const Value& val) {
             // string
             else if constexpr (std::is_same_v<T, std::string>)
                 return !val.empty();
-
+            // list
+            else if constexpr (std::is_same_v<T, std::shared_ptr<List>>)
+                return !val->elements.empty();
             // fallback(everything's truthy unless it's falsy)
             else
                 return true;

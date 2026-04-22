@@ -2,8 +2,15 @@
 
 ASTStmtNode::ASTStmtNode(ASTStmtNodeType type) : type(type) {}
 
-VarDeclNode::VarDeclNode(std::unique_ptr<ASTExprNode> name, std::unique_ptr<ASTExprNode> value)
-    : ASTStmtNode(ASTStmtNodeType::VAR_DECL), name(std::move(name)), value(std::move(value)) {}
+AssignNode::AssignNode(std::unique_ptr<ASTExprNode> lhs, std::unique_ptr<ASTExprNode> value)
+    : ASTStmtNode(ASTStmtNodeType::ASSIGN), lhs(std::move(lhs)), value(std::move(value)) {}
+
+CompoundNode::CompoundNode(std::unique_ptr<ASTExprNode> lhs, std::unique_ptr<ASTExprNode> value,
+                           OperatorType op)
+    : ASTStmtNode(ASTStmtNodeType::COMPOUND),
+      lhs(std::move(lhs)),
+      value(std::move(value)),
+      op(op) {}
 
 FunctionDeclNode::FunctionDeclNode(std::string name, std::vector<std::string> params,
                                    std::unique_ptr<ASTStmtNode> body)

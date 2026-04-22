@@ -46,19 +46,30 @@ OperatorType ExprParser::toOperatorType(TokenType type) {
 
         // additive
         case TokenType::PLUS:
+        case TokenType::PLUSEQUAL:
             return OperatorType::PLUS;
         case TokenType::MINUS:
+        case TokenType::MINUSEQUAL:
             return OperatorType::MINUS;
 
         // multiplicative
         case TokenType::STAR:
+        case TokenType::STAREQUAL:
             return OperatorType::STAR;
         case TokenType::SLASH:
+        case TokenType::SLASHEQUAL:
             return OperatorType::SLASH;
         case TokenType::FLOORDIV:
+        case TokenType::FLOOREQUAL:
             return OperatorType::FLOORDIV;
         case TokenType::MODULO:
+        case TokenType::MODULOEQUAL:
             return OperatorType::MODULO;
+
+        // power
+        case TokenType::POWER:
+        case TokenType::POWEREQUAL:
+            return OperatorType::POWER;
 
         default:
             // never supposed to happen
@@ -207,6 +218,16 @@ std::unique_ptr<ASTExprNode> ExprParser::parsePostfix() {
             advance();
 
             lhs = std::make_unique<CallNode>(std::move(lhs), std::move(args));
+        } else if (match(TokenType::LBRACKET)) {
+            advance();
+            auto index = parseExpr();
+
+            if (!match(TokenType::RBRACKET)) {
+                throw std::runtime_error("expected closing bracket");
+            }
+            advance();
+
+            lhs = std::make_unique<IndexNode>(std::move(lhs), std::move(index));
         } else {
             break;
         }
@@ -221,11 +242,32 @@ std::unique_ptr<ASTExprNode> ExprParser::parsePrimary() {
         auto expr = parseExpr();
 
         if (!match(TokenType::RPAREN)) {
-            throw std::runtime_error("expected closing parenthesis");
+            throw std::runtime_error("expected closing bracket");
         }
         advance();
 
         return expr;
+    }
+
+    if (match(TokenType::LBRACKET)) {
+        advance();
+        std::vector<std::unique_ptr<ASTExprNode>> elements;
+
+        if (!match(TokenType::RBRACKET)) {
+            elements.push_back(parseExpr());
+
+            while (match(TokenType::COMMA)) {
+                advance();
+                elements.push_back(parseExpr());
+            }
+        }
+
+        if (!match(TokenType::RBRACKET)) {
+            throw std::runtime_error("expected closing bracket");
+        }
+        advance();
+
+        return std::make_unique<ListNode>(std::move(elements));
     }
 
     Token token = peek();
