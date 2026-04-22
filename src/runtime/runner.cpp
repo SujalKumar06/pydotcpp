@@ -30,8 +30,8 @@ void Environment::update(const std::string& name, const Value& val) {
             parent->update(name, val);
         else
             throw std::runtime_error("undefined variable referenced");
-    }
-    it->second = val;
+    } else
+        it->second = val;
 }
 
 Runner::Runner() {
