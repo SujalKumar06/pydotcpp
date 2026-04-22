@@ -301,7 +301,8 @@ void Runner::printString(const std::string& str) {
                     break;
                 default:
                     // unknown escape, so just print
-                    result += '\\' + str[i + 1];
+                    result += '\\';
+                    result += str[i + 1];
                     break;
             }
             i++;  // skip next character
