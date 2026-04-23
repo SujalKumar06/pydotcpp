@@ -78,7 +78,7 @@ std::unique_ptr<ASTExprNode> ExprParser::parseLogicalOr() {
         advance();
         auto rhs = parseLogicalAnd();
         lhs =
-            std::make_unique<BinaryOperatorNode>(OperatorType::OR, std::move(lhs), std::move(rhs));
+            std::make_unique<BinaryOperatorNode>(OperatorType::AND, std::move(lhs), std::move(rhs));
     }
 
     return lhs;

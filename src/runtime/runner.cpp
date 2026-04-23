@@ -91,12 +91,6 @@ ReturnType Runner::runStmt(const ASTStmtNode& stmt) {
 
         case ASTStmtNodeType::ELSE_STMT:
             return runStmt(*static_cast<const ElseStmtNode&>(stmt).block);
-        
-        case ASTStmtNodeType::BREAK_STMT:
-            return ReturnType::BREAK;
-
-        case ASTStmtNodeType::CONTINUE_STMT:
-            return ReturnType::CONTINUE;
 
         case ASTStmtNodeType::CONTINUE_STMT:
             return ReturnType::CONTINUE;
