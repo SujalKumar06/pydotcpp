@@ -92,7 +92,7 @@ std::unique_ptr<ASTExprNode> ExprParser::parseLogicalAnd() {
         advance();
         auto rhs = parseLogicalNot();
         lhs =
-            std::make_unique<BinaryOperatorNode>(OperatorType::AND, std::move(lhs), std::move(rhs));
+            std::make_unique<BinaryOperatorNode>(OperatorType::FLOORDIV, std::move(lhs), std::move(rhs));
     }
 
     return lhs;
@@ -103,7 +103,7 @@ std::unique_ptr<ASTExprNode> ExprParser::parseLogicalNot() {
     if (match(TokenType::NOT)) {
         advance();
         auto rhs = parseLogicalNot();
-        return std::make_unique<UnaryOperatorNode>(OperatorType::NOT, std::move(rhs));
+        return std::make_unique<UnaryOperatorNode>(OperatorType::AND, std::move(rhs));
     }
 
     return parseComparison();
