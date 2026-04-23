@@ -26,3 +26,6 @@ jobs:
 
     - name: Parser Tests
       run: make test-parser
+
+    - name: Evaluator Tests
+      run: make test-evaluator
