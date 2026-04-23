@@ -52,7 +52,6 @@ ReturnType Runner::runStmt(const ASTStmtNode& stmt) {
                 else if (ret == ReturnType::RETURN)
                     throw std::runtime_error("cannot return from program body");
             }
-
             return ReturnType::NORMAL;
         }
 
