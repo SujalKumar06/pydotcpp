@@ -1,5 +1,5 @@
 #vars
-TARGET_EXEC := executable
+TARGET_EXEC := pydotcpp
 BUILD_DIR := build
 SRC_DIR := src
 TEST_DIR := tests
