@@ -144,6 +144,8 @@ ReturnType Runner::runStmt(const ASTStmtNode& stmt) {
                     break;
                 else if (ret == ReturnType::CONTINUE)
                     continue;
+                else if (ret == ReturnType::RETURN)
+                    return ReturnType::RETURN;
             }
 
             return ReturnType::NORMAL;
