@@ -100,3 +100,4 @@ If you are contributing to or modifying the C++ source code, you can use the bui
 * `tests/` - C++ test files for the interpreter's discrete components.
 * `entrypoint.cpp` - The main entry point for the compiled executable.
 * `Makefile` - Build, test, and format configuration.
+
